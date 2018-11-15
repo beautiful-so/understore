@@ -79,8 +79,9 @@
 		}
 
 		if(k != "$ync"){
-			Repaint(_dom[attr], value);
-			
+			if(_dom[attr]){
+				Repaint(_dom[attr], value);   
+			}
 		}
 	}
 
@@ -162,9 +163,12 @@
 						option.insert = state.insert;
 						option.cache = false;
 						option.body = Template(option.template, newValue, id, idx, state.parent);
+						state.parent ? newValue.parent = state.parent : "";
 
-						Async(option);
+						Async(option, newValue);
 					}else if(state.type === "set"){
+						newValue.id = id;
+						newValue.idx = idx;
 						option.data = [newValue];
 						delete newValue.$tate;
 						Diff(newValue, oldValue, option);
@@ -204,7 +208,7 @@
 		}
 	}
 
-	function Render(option){
+	function Render(option, data){
 		var _dom = dom[option.id][option.idx.toString()] = {};
 		var element = document.createElement("div");
 			element.innerHTML = option.body;
@@ -214,11 +218,15 @@
 		
 		function eventBind(event, element, option, _option, _value){
 			return function(event){
-				option.events[_value](event, element, _option);
+				var o = GetItem(_option);
+					o.data.id  = _option.id;
+					o.data.idx = _option.idx;
+				
+				option.events[_value](event, element, o.data);
 			};
 		}
 
-		function parse(target, node){
+		function parse(target, node, data){
 			for (var i = 0, len1 = node.childNodes.length; i < len1; i++) {
 				var childNode = node.childNodes[i];
 				var nodeType = childNode.nodeType;
@@ -233,6 +241,7 @@
 						if (attribute.specified) {
 							var name  = attribute.nodeName;
 							var value = attribute.nodeValue;
+							var o = data;
 
 							if (name.indexOf("_") == 0){
 								var _name = name.replace("_", "");
@@ -264,8 +273,7 @@
 								var _value = attribute.nodeValue;
 								var _option = JSON.stringify(option);
 									_option = JSON.parse(_option);
-
-								var handle = eventBind(event, childNode, option, _option,_value);
+								var handle = eventBind(event, childNode, option, _option, _value);
 
 								childNode.addEventListener(name.replace("on", ""), handle);
 								if(_dom[name]){
@@ -297,7 +305,7 @@
 				if (childNode.parentNode == node) {
 					if (childNode.childNodes.length) {
 						var _target = document.createElement(nodeName);
-						parse(_target, childNode);
+						parse(_target, childNode, data);
 					} else {
 						_dom.node = element;
 						if(option.insert == "prepend"){
@@ -309,11 +317,11 @@
 				} 
 			}
 		}
-		parse(option.target, element);
+		parse(option.target, element, data);
 	}
 
-	function Async(option){
-		Render(option);
+	function Async(option, data){
+		Render(option, data);
 
 		!option.cache ? option.insert == "prepend" ? index[option.id].unshift(option.idx) : index[option.id].push(option.idx) : "";
 		!option.cache && option.sync ? SetCookie(option.id, index[option.id]) : "";
@@ -435,7 +443,6 @@
 			option.idx = idx;
 		}
 		var key = getIdx(option, idx);
-
 		var data = option.data[($for[id].type ? 0 : idx)];
 
 		if(data){
@@ -448,6 +455,8 @@
 					parent : option.parent,
 					insert : option.insert
 				};
+				data.parent = option.parent;
+
 				_data = JSON.stringify(data);
 				sync ? $tore.localStorage.setItem(key, _data) : $tore.sessionStorage.setItem(key, _data);
 				return {id : id , idx : idx};
@@ -457,9 +466,13 @@
 					parent = data.$tate.parent; 
 					option.insert = data.$tate.insert;
 				}
+
 				option.body = Template(option.template, data, option.id, option.idx, parent);
 				option.cache = true;
-				Async(option);
+				data.id = option.id;
+				data.idx = option.idx;
+				data.parent = parent;
+				Async(option, data);
 			}
 		
 		}
@@ -516,7 +529,7 @@
 			var d = sync ? localStorage.getItem(id+"-!#"+option.idx) : sessionStorage.getItem(id+"-!#"+option.idx);
 				d = d ? JSON.parse(d) : null;
 
-			data = {data : d, element : _dom[option.idx], id : id, idx : option.idx};
+			data = {data : d, element : _dom[option.idx].node, id : id, idx : option.idx};
 		}else{
 			data = null;
 		}
