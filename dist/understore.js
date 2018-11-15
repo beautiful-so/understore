@@ -161,8 +161,8 @@
 					if(state.type === "add"){
 						option.insert = state.insert;
 						option.cache = false;
-
 						option.body = Template(option.template, newValue, id, idx, state.parent);
+
 						Async(option);
 					}else if(state.type === "set"){
 						option.data = [newValue];
@@ -172,7 +172,22 @@
 						option.type = "remove";
 						var _idx = index[id].indexOf(idx*1);
 						option.data = [newValue];
-						dom[id][idx].parentNode.removeChild(dom[id][idx]);
+
+						for (var property in dom[id][idx]) {
+							if(dom[id][idx].hasOwnProperty(property)){
+								if(property != "property"){
+									if(property.indexOf("on") == 0){
+										for(var e in dom[id][idx][property].events){
+											var type = dom[id][idx][property].events.type;
+											var handle = dom[id][idx][property].events.handle;
+											dom[id][idx][property].events.element.removeEventListener(type, handle);
+										}
+									}
+								}
+							}
+						}
+
+						dom[id][idx].node.parentNode.removeChild(dom[id][idx].node);
 						delete dom[id][idx];
 
 						index[id].splice(_idx, 1);
@@ -190,13 +205,18 @@
 	}
 
 	function Render(option){
-		var _dom = dom[option.id];
-			_dom =_dom[option.idx.toString()] = {};
+		var _dom = dom[option.id][option.idx.toString()] = {};
 		var element = document.createElement("div");
 			element.innerHTML = option.body;
 
 		var tagName = element.childNodes[0].nodeName.toLowerCase();
 			element = element.querySelector(tagName);
+		
+		function eventBind(event, element, option, _option, _value){
+			return function(event){
+				option.events[_value](event, element, _option);
+			};
+		}
 
 		function parse(target, node){
 			for (var i = 0, len1 = node.childNodes.length; i < len1; i++) {
@@ -213,37 +233,62 @@
 						if (attribute.specified) {
 							var name  = attribute.nodeName;
 							var value = attribute.nodeValue;
-							
-							
+
 							if (name.indexOf("_") == 0){
-								setTimeout(function(childNode, name, value, _dom_){
-									var _name = name.replace("_", "");
-									_dom_[_name] = {
-										element : childNode,
-										attr : value
-									};
+								var _name = name.replace("_", "");
+								var _value = attribute.nodeValue;
+								_dom[_name] = {
+									element : childNode,
+									attr : _value,
+									event : {}
+								};
+								setTimeout(function(childNode, name){
 									childNode.removeAttribute(name);
-								}, 0, childNode, name, value, _dom);
+								}, 0, childNode, name);
 							}
+
 							if(name.indexOf("-") == 0){
-								setTimeout(function(childNode, name, value, _dom_){
-									var _name = name.replace("-", "");
-									_dom_[_name] = {
-										element : childNode,
-										attr : value
-									};
+								var _name = name.replace("-", "");
+								var _value = attribute.nodeValue;
+								_dom[_name] = {
+									element : childNode,
+									attr : _value,
+									event : {}
+								};
+								setTimeout(function(childNode, name){
 									childNode.removeAttribute(name);
-								}, 0, childNode, name, value, _dom);
+								}, 0, childNode, name);
 							}
 
 							if(name.indexOf("on") > -1){
-								setTimeout(function(childNode, name, value){
-									childNode.addEventListener(name.replace("on", ""), function(event){
-										option.events[name](event, this, option);
-									});
+								var _value = attribute.nodeValue;
+								var _option = JSON.stringify(option);
+									_option = JSON.parse(_option);
+
+								var handle = eventBind(event, childNode, option, _option,_value);
+
+								childNode.addEventListener(name.replace("on", ""), handle);
+								if(_dom[name]){
+									_dom[name].events = {
+										type : name.replace("on", ""),
+										element : childNode,
+										handle : handle
+									};
+								}else{
+									_dom[name] = {
+										events : {
+											type : name.replace("on", ""),
+											element : childNode,
+											handle : handle
+										}
+									};
+								}
+
+								setTimeout(function(childNode, name){
 									childNode.removeAttribute(name);
-								}, 0, childNode, name, value);
+								}, 0, childNode, name);
 							}
+							
 
 						}
 					}
@@ -254,6 +299,7 @@
 						var _target = document.createElement(nodeName);
 						parse(_target, childNode);
 					} else {
+						_dom.node = element;
 						if(option.insert == "prepend"){
 							option.target.insertBefore(element);
 						}else{
@@ -329,6 +375,7 @@
 			for(var i = 0; i < len; i++){
 				var idx = index[option.id][i];
 				var data = option.sync ? localStorage.getItem(option.id+"-!#"+[idx]) : sessionStorage.getItem(option.id+"-!#"+[idx]);
+				var obj = JSON.parse(data);
 
 				if(obj){
 					typeof obj.$tate != "undefined" ? obj.parent = obj.$tate.parent : "";
