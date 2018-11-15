@@ -4,6 +4,7 @@
 	typeof define === 'function' && define.amd ? define(factory) :
 	(global.understore = factory());
 }(this, (function () { 'use strict';
+	var a$ync = [];
 	var $tore, $ync = true;
 	var $dom, dom = {};
 	var options = {};
@@ -38,7 +39,7 @@
 	function mixin(receiver, supplier) {
 		for (var property in supplier) {
 			if(supplier.hasOwnProperty(property)){
-				receiver[property] = supplier[property]
+				receiver[property] = supplier[property];
 			}
 		}
 		return receiver;
@@ -55,6 +56,30 @@
 		}else{
 			el.setAttribute(attr, value);
 		}
+		removeAsync();
+	}
+
+	function removeAsync(){
+		var _async = a$ync.shift();
+
+		if(_async){
+			if(typeof _async[0] != "undefined"){
+				eval(_async[0].action+"({option : a$ync[0].option, action : a$ync[0].action, async: true})");
+			}
+		}
+	}
+
+	function addAsync(o){
+		a$ync.shift();
+		if(!o.async){
+			a$ync.push(o);
+		}
+		return a$ync.length >= 1 ? 1 : 0;
+	}
+
+	function typeof_option(option){
+		option = typeof option.option != "undefined" ? option.option : option;
+		return option;
 	}
 
 	function DiffChanged(v, prop){
@@ -201,6 +226,7 @@
 						}
 
 						option.sync ? SetCookie(id, index[id]) : "";
+						removeAsync();
 					}
 					ChangedItem(option);
 				}
@@ -313,6 +339,7 @@
 						}else{
 							option.target.appendChild(element);
 						}
+						ChangedItem(option);
 					}
 				} 
 			}
@@ -333,6 +360,7 @@
 			}else{
 				delete option.cache;
 				ChangedItem(option);
+				removeAsync();
 			}
 		}else if(option.sync){
 			var len = index[option.id].length;
@@ -363,37 +391,40 @@
 	}
 
 	function AddItem(option){
-		if(!understore){
-			understore = typeof _ == "undefined" ? _ = {} : {};  
-		}
-
-		typeof option.events != "undefined" ? understore[option.id] = option.events : "";
-		typeof option.created != "undefined" ? option.created(option) : "";
-		typeof option.css != "undefined" ? SetStyle(option) : "";
-
-		typeof dom[option.id] == "undefined" ? dom[option.id] = {} : "";
-        typeof index[option.id] == "undefined" ? index[option.id] = [] : "";
-
-		index[option.id] = option.sync ? JSON.parse("["+GetCookie(option.id)+"]") : index[option.id];
-		var len = index[option.id].length;
-
-		if(len > 0 && option.sync){
-			option.data = [];
-			option.cache = true;
-			for(var i = 0; i < len; i++){
-				var idx = index[option.id][i];
-				var data = option.sync ? localStorage.getItem(option.id+"-!#"+[idx]) : sessionStorage.getItem(option.id+"-!#"+[idx]);
-				var obj = JSON.parse(data);
-
-				if(obj){
-					typeof obj.$tate != "undefined" ? obj.parent = obj.$tate.parent : "";
-					option.data.push(obj);
-				}
+		option = typeof_option(option);
+		if(addAsync({option: option, action:"AddItem", async : option.async})){
+			if(!understore){
+				understore = typeof _ == "undefined" ? _ = {} : {};  
 			}
-		}else{
-			option.cache = false;
+
+			typeof option.events != "undefined" ? understore[option.id] = option.events : "";
+			typeof option.created != "undefined" ? option.created(option) : "";
+			typeof option.css != "undefined" ? SetStyle(option) : "";
+
+			typeof dom[option.id] == "undefined" ? dom[option.id] = {} : "";
+			typeof index[option.id] == "undefined" ? index[option.id] = [] : "";
+
+			index[option.id] = option.sync ? JSON.parse("["+GetCookie(option.id)+"]") : index[option.id];
+			var len = index[option.id].length;
+
+			if(len > 0 && option.sync){
+				option.data = [];
+				option.cache = true;
+				for(var i = 0; i < len; i++){
+					var idx = index[option.id][i];
+					var data = option.sync ? localStorage.getItem(option.id+"-!#"+[idx]) : sessionStorage.getItem(option.id+"-!#"+[idx]);
+					var obj = JSON.parse(data);
+
+					if(obj){
+						typeof obj.$tate != "undefined" ? obj.parent = obj.$tate.parent : "";
+						option.data.push(obj);
+					}
+				}
+			}else{
+				option.cache = false;
+			}
+			return SyncItem(option);
 		}
-		return SyncItem(option);
 	}
 
 	function SyncItem(option){
@@ -466,7 +497,7 @@
 					parent = data.$tate.parent; 
 					option.insert = data.$tate.insert;
 				}
-
+AddItem
 				option.body = Template(option.template, data, option.id, option.idx, parent);
 				option.cache = true;
 				data.id = option.id;
@@ -479,24 +510,27 @@
 	}
 
 	function SetItem(option){
-		typeof option.idx == "undefined" ? option.idx = 0 : "";
-		typeof option.template == "undefined" ? option.template = options[option.id].template : "";
-		var key = getIdx(option, option.idx);
-		var sync = options[option.id].sync;
-		var newValue = option.data;
-		var oldValue = sync ? $tore.localStorage.getItem(key) : $tore.sessionStorage.getItem(key);
+		option = typeof_option(option);
+		if(addAsync({option: option, action: "SetItem", async : option.async})){
+			typeof option.idx == "undefined" ? option.idx = 0 : "";
+			typeof option.template == "undefined" ? option.template = options[option.id].template : "";
+			var key = getIdx(option, option.idx);
+			var sync = options[option.id].sync;
+			var newValue = option.data;
+			var oldValue = sync ? $tore.localStorage.getItem(key) : $tore.sessionStorage.getItem(key);
 
-		oldValue = JSON.parse(oldValue);
-		oldValue != null ? delete oldValue.$tate : "";
-		oldValue = JSON.stringify(oldValue);
-		var _newValue = JSON.stringify(newValue);
+			oldValue = JSON.parse(oldValue);
+			oldValue != null ? delete oldValue.$tate : "";
+			oldValue = JSON.stringify(oldValue);
+			var _newValue = JSON.stringify(newValue);
 
-		if(oldValue != _newValue){
-			typeof newValue.$tate == "undefined" ? newValue.$tate = { type : "set" } : newValue.$tate.type = "set";
-			_newValue = JSON.stringify(newValue);
-			sync ? $tore.localStorage.setItem(key, _newValue) : $tore.sessionStorage.setItem(key, _newValue);
+			if(oldValue != _newValue){
+				typeof newValue.$tate == "undefined" ? newValue.$tate = { type : "set" } : newValue.$tate.type = "set";
+				_newValue = JSON.stringify(newValue);
+				sync ? $tore.localStorage.setItem(key, _newValue) : $tore.sessionStorage.setItem(key, _newValue);
+			}
 		}
-		return;
+
 	}
 
 	function GetItems(option){
