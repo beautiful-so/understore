@@ -64,13 +64,12 @@
 
 		if(_async){
 			if(typeof _async[0] != "undefined"){
-				eval(_async[0].action+"({option : a$ync[0].option, action : a$ync[0].action, async: true})");
+				_async[0].action({option : a$ync[0].option, action : a$ync[0].action, async: true});
 			}
 		}
 	}
 
 	function addAsync(o){
-		a$ync.shift();
 		if(!o.async){
 			a$ync.push(o);
 		}
