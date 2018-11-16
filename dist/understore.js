@@ -1,13 +1,14 @@
 (function (global, factory) {
-	understore = typeof _ == "undefined" ? _ = {} : {};
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
 	(global.understore = factory());
 }(this, (function () { 'use strict';
+	var understore = {};
 	var a$ync = [];
 	var $tore, $ync = true;
 	var $dom, dom = {};
 	var options = {};
+	var events = {}
 	var $for = {};
 	var index = {};
 
@@ -24,17 +25,22 @@
 		$dom = document.getElementById("understore"+uid).contentDocument;
 		$tore = document.getElementById("understore"+uid).contentWindow;
 
-		understore.getItem = GetItem;
-		understore.getItems = GetItems;
-		understore.addItem = AddItem;
-		understore.setItem = SetItem;
-		understore.clear = Clear;
-		understore.removeItem = RemoveItem;
-		understore.getCookie = GetCookie;
-		understore.setCookie = SetCookie;
-		
-		mixin(_, understore);
+		typeof window._ == "undefined" ? window._ = {} : "";
+
+		understore = {
+			getItem : GetItem,
+			getItems : GetItems,
+			addItem : AddItem,
+			setItem : SetItem,
+			clear : Clear,
+			removeItem : RemoveItem,
+			getCookie : GetCookie,
+			setCookie : SetCookie
+		};
+
+		mixin(window._, understore);
 	})();
+
 
 	function mixin(receiver, supplier) {
 		for (var property in supplier) {
@@ -390,11 +396,7 @@
 	function AddItem(option){
 		option = typeof_option(option);
 		if(addAsync({option: option, action:"AddItem", async : option.async})){
-			if(!understore){
-				understore = typeof _ == "undefined" ? _ = {} : {};  
-			}
-
-			typeof option.events != "undefined" ? understore[option.id] = option.events : "";
+			typeof option.events != "undefined" ? events[option.id] = option.events : "";
 			typeof option.created != "undefined" ? option.created(option) : "";
 			typeof option.css != "undefined" ? SetStyle(option) : "";
 
@@ -664,4 +666,6 @@
 			}
 		}
 	}
+
+	return understore;
 })));
