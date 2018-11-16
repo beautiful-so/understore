@@ -245,10 +245,11 @@
 		function eventBind(event, element, option, _option, _value){
 			return function(event){
 				var o = GetItem(_option);
-					o.data.id  = _option.id;
-					o.data.idx = _option.idx;
-				
-				option.events[_value](event, element, o.data);
+				event.id  = _option.id;
+				event.idx = _option.idx;
+				event.element = element;
+				event.data = o.data;
+				option.events[_value](event);
 			};
 		}
 
@@ -299,7 +300,7 @@
 								var _value = attribute.nodeValue;
 								var _option = JSON.stringify(option);
 									_option = JSON.parse(_option);
-								var handle = eventBind(event, childNode, option, _option, _value);
+								var handle = eventBind(event, element, option, _option, _value);
 
 								childNode.addEventListener(name.replace("on", ""), handle);
 								if(_dom[name]){
@@ -538,9 +539,9 @@ AddItem
 		var data = [];
 		var id = option.id;
 		var item = index[id];
-		var len = item.length;
 
-        if(len){
+        if(item){
+        	var len = item.length;
             for(var i = 0; i < len; i++){
                 var idx = typeof index[id][i] != "undefined" ? index[id][i] : 0;
                 data.push(GetItem({id : option.id, idx :idx}));
@@ -584,7 +585,7 @@ AddItem
 
 		if(len){
 			for(var i = 0; i < len; i++){
-				understore.removeItem({id : id, idx : item[i]});
+				RemoveItem({id : id, idx : item[i]});
 			}
 		}
 
