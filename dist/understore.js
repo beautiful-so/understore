@@ -268,7 +268,6 @@
 						if (attribute.specified) {
 							var name  = attribute.nodeName;
 							var value = attribute.nodeValue;
-							var o = data;
 
 							if (name.indexOf("_") == 0){
 								var _name = name.replace("_", "");
@@ -296,7 +295,7 @@
 								}, 0, childNode, name);
 							}
 
-							if(name.indexOf("on") > -1){
+							if(name.indexOf("on") == 0){
 								var _value = attribute.nodeValue;
 								var _option = JSON.stringify(option);
 									_option = JSON.parse(_option);
@@ -323,8 +322,6 @@
 									childNode.removeAttribute(name);
 								}, 0, childNode, name);
 							}
-							
-
 						}
 					}
 				}
@@ -498,7 +495,7 @@
 					parent = data.$tate.parent; 
 					option.insert = data.$tate.insert;
 				}
-AddItem
+
 				option.body = Template(option.template, data, option.id, option.idx, parent);
 				option.cache = true;
 				data.id = option.id;
