@@ -24,9 +24,10 @@
 		document.head.appendChild(ifrm);
 		$dom = document.getElementById("understore"+uid).contentDocument;
 		$tore = document.getElementById("understore"+uid).contentWindow;
+	})();
 
+	(function () { 
 		typeof window._ == "undefined" ? window._ = {} : "";
-
 		understore = {
 			getItem : GetItem,
 			getItems : GetItems,
@@ -38,18 +39,12 @@
 			setCookie : SetCookie
 		};
 
-		mixin(window._, understore);
-	})();
-
-
-	function mixin(receiver, supplier) {
-		for (var property in supplier) {
-			if(supplier.hasOwnProperty(property)){
-				receiver[property] = supplier[property];
+		for (var prop in understore) {
+			if(understore.hasOwnProperty(prop)){
+				_[prop] = understore[prop];
 			}
 		}
-		return receiver;
-	}
+	})();
 
 	function Repaint(o, value){
 		var el = o.element;
@@ -62,39 +57,31 @@
 		}else{
 			el.setAttribute(attr, value);
 		}
-		removeAsync();
 	}
 
-	function removeAsync(){
-		a$ync.sort(function (a, b) { 
-			return a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0;
-		});
-
+	function removeAsync(type){
 		var _async = a$ync.shift();
+		console.log(_async);
 
 		if(_async){
-			understore[_async.action](_async);
+			!type ? new Function(_async.action+"({option : a$ync[0].option, action : a$ync[0].action, async: true})") : "";
 		}
-		
 	}
 
 	function addAsync(o){
 		var len = a$ync.length;
+		console.log(o, !len);
 
-		if(o.timestamp){
-			return true;
-		}else{
-			o.timestamp = new Date().getTime();
-
-			len ? a$ync.push(o) : "";
-			return len == 0;
+		if(!o.async){
+			a$ync.push(o)
+			// len ? a$ync.push(o) : a$ync.push(false);
 		}
-		
+
+		return len;
 	}
 
 	function typeof_option(option){
-		option = typeof option.option != "undefined" ? option.option : option;
-		return option;
+		return typeof option.option != "undefined" ? option.option : option;
 	}
 
 	function DiffChanged(v, prop){
@@ -123,12 +110,14 @@
 				Repaint(_dom[attr], value);   
 			}
 		}
+		return;
 	}
 
 	function Diff(obj1, obj2, v) {
 		for (var prop in obj1) {
 			obj1.hasOwnProperty(prop) && prop != '__proto__' ? obj1[prop] != obj2[prop] ? DiffChanged(v, prop) : "" : "";
 		}
+		removeAsync();
 	}
 
 	function Template(html, obj, id, idx){
@@ -205,14 +194,19 @@
 						option.body = Template(option.template, newValue, id, idx, state.parent);
 						state.parent ? newValue.parent = state.parent : "";
 
-						Async(option, newValue);
+						if($for[option.id]){
+							if($for[option.id].idx < $for[option.id].len){
+								Async(option, newValue)
+							}else{
+								removeAsync();
+							}
+						}
 					}else if(state.type === "set"){
 						newValue.id = id;
 						newValue.idx = idx;
 						option.data = [newValue];
 						delete newValue.$tate;
 						Diff(newValue, oldValue, option);
-						removeAsync();
 					}else if(!newValue){
 						option.type = "remove";
 						var _idx = index[id].indexOf(idx*1);
@@ -237,12 +231,21 @@
 
 						index[id].splice(_idx, 1);
 
+						if(Clear.for){
+							Clear.for -= 1;
+							if(Clear.for == 1){
+								removeAsync();
+								delete Clear.for;
+							}
+						}else{
+							removeAsync();
+						}
+
 						if(index[id].length == 0){
 							delete $for[id];
 						}
 
 						option.sync ? SetCookie(id, index[id]) : "";
-						removeAsync();
 					}
 					ChangedItem(option);
 				}
@@ -406,7 +409,7 @@
 
 	function AddItem(option){
 		option = typeof_option(option);
-		if(addAsync({option: option, action:"addItem", timestamp : option.timestamp})){
+		if(addAsync({option: option, action:"AddItem", async : option.async})){
 			typeof option.events != "undefined" ? events[option.id] = option.events : "";
 			typeof option.created != "undefined" ? option.created(option) : "";
 			typeof option.css != "undefined" ? SetStyle(option) : "";
@@ -485,6 +488,7 @@
 		}
 		var key = getIdx(option, idx);
 		var data = option.data[($for[id].type ? 0 : idx)];
+
 		if(data){
 			!sync ? data.$ync = Math.random().toString(36).substring(7) : "";
 			var _data = JSON.stringify(data);
@@ -499,7 +503,6 @@
 
 				_data = JSON.stringify(data);
 				sync ? $tore.localStorage.setItem(key, _data) : $tore.sessionStorage.setItem(key, _data);
-				removeAsync();
 				return {id : id , idx : idx};
 			}else{
 				var parent;
@@ -516,14 +519,12 @@
 				Async(option, data);
 			}
 		
-		}else{
-			removeAsync();
 		}
 	}
 
 	function SetItem(option){
 		option = typeof_option(option);
-		
+		if(addAsync({option: option, action: "SetItem", async : option.async})){
 			typeof option.idx == "undefined" ? option.idx = 0 : "";
 			typeof option.template == "undefined" ? option.template = options[option.id].template : "";
 			var key = getIdx(option, option.idx);
@@ -537,12 +538,11 @@
 			var _newValue = JSON.stringify(newValue);
 
 			if(oldValue != _newValue){
-				if(addAsync({option: option, action: "setItem", timestamp : option.timestamp})){
-					typeof newValue.$tate == "undefined" ? newValue.$tate = { type : "set" } : newValue.$tate.type = "set";
-					_newValue = JSON.stringify(newValue);
-					sync ? $tore.localStorage.setItem(key, _newValue) : $tore.sessionStorage.setItem(key, _newValue);
-				}
+				typeof newValue.$tate == "undefined" ? newValue.$tate = { type : "set" } : newValue.$tate.type = "set";
+				_newValue = JSON.stringify(newValue);
+				sync ? $tore.localStorage.setItem(key, _newValue) : $tore.sessionStorage.setItem(key, _newValue);
 			}
+		}
 
 	}
 
@@ -568,7 +568,6 @@
 		var data = {};
 		var id = option.id;
 		var _dom = dom[id];
-
 		if(typeof _dom != "undefined"){
 			typeof option.idx == "undefined" ? option.idx = 0 : "";
 			var len = Object.keys(_dom).length-1;
@@ -580,13 +579,15 @@
 		}else{
 			data = null;
 		}
-
 		return data;
 	}
 
 	function RemoveItem(option){
-		var v, sync = options[option.id].sync;
-			v = sync ? $tore.localStorage.removeItem(option.id+"-!#"+option.idx) : $tore.sessionStorage.removeItem(option.id+"-!#"+option.idx);
+		var delay = !Clear.for ? addAsync({option: option, action: "RemoveItem", async : option.async}) : true;
+		if(delay){
+			var v, sync = options[option.id].sync;
+				v = sync ? $tore.localStorage.removeItem(option.id+"-!#"+option.idx) : $tore.sessionStorage.removeItem(option.id+"-!#"+option.idx);
+		}
 		return v;
 	}
 
@@ -596,8 +597,11 @@
 		var len = item ? item.length : false;
 
 		if(len){
-			for(var i = 0; i < len; i++){
-				RemoveItem({id : id, idx : item[i]});
+			if(addAsync({option: option, action: "Clear", async : option.async})){
+				Clear.for = len;
+				for(var i = 0; i < len; i++){
+					RemoveItem({id : id, idx : item[i]});
+				}
 			}
 		}
 
