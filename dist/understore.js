@@ -7,7 +7,7 @@
 	var $tore, $ync = true;
 	var $dom, dom = {};
 	var options = {};
-	var events = {}
+	var events = {};
 	var $for = {};
 	var index = {};
 
@@ -27,19 +27,29 @@
 		typeof window._ == "undefined" ? window._ = {} : "";
 
 		understore = {
+			getCookie : GetCookie,
+			setCookie : SetCookie,
 			getItem : GetItem,
 			getItems : GetItems,
-			addItem : AddItem,
-			setItem : SetItem,
-			clear : Clear,
-			removeItem : RemoveItem,
-			getCookie : GetCookie,
-			setCookie : SetCookie
+			addItem : function(option){
+				option = Async(option, "addItem");
+				option ? AddItem(option) : "";
+			},
+			setItem : function(option){
+				option = Async(option, "setItem");
+				option ? SetItem(option) : "";
+			},
+			removeItem : function(option){
+				option = Async(option, "removeItem");
+				option ? RemoveItem() : "";
+			},
+			clear : function(option){
+				setTimeout(function(){Clear(option);}, 0);
+			}
 		};
 
 		mixin(window._, understore);
 	})();
-
 
 	function mixin(receiver, supplier) {
 		for (var property in supplier) {
@@ -51,83 +61,42 @@
 	}
 
 	function Await(o){
-		var len = 0;
+		!Await.tasks ? Await.tasks = [] : "";
+		var states, task, len = Await.tasks.length;
+		
 		if(o){
-			len = Await.promise ? Await.promise.length : Await.promise = [];
-			len = len.length;
-
-			if(o.timestamp){
+			if(o.promise){
 				return true;
 			}else{
-				o.timestamp = new Date().getTime();
+				o.promise = true;
 
-				len ? Await.promise.push(o) : Await.promise.push(false);
-
-				return !len;
-			}
-		}else{
-			Await.promise.sort(function (a, b) { 
-				return a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0;
-			});
-			var promise = Await.promise.shift();
-
-			if(promise){
-				understore[promise.action](promise);
+				states = !Await.promise ? task = Await.tasks.push(o) : false;
 			}
 		}
+
+		if(!task){
+			task = Await.tasks.shift();
+
+			if(task){
+				understore[task.action](task);
+			}else{
+				Await.promise = false;
+			}
+		}
+		return states;
 	}
 
-	function typeof_option(option){
-		option = typeof option.option != "undefined" ? option.option : option;
+	function Async(option, action){
+		var states = Await({option: option, action:action, promise : option.promise});
+
+		if(typeof option.option != "undefined"){
+			var promise = option.option.promise;
+			option = option.option;
+			option.promise = promise;
+		}else{
+			option = states ? option : states;
+		}
 		return option;
-	}
-
-	function Repaint(o, value){
-		var el = o.element;
-		var attr = o.attr;
-
-		if(attr == ""){
-			el.innerHTML = value;
-		}else if(attr == "value"){
-			el[attr] = value;
-		}else{
-			el.setAttribute(attr, value);
-		}
-		Await();
-	}
-
-	function DiffChanged(v, prop){
-		var id = v.id;
-		var value = v.data[0][prop];
-		var _dom = dom[v.id][v.idx];
-		var k = "";
-		var attr = prop;
-
-		if(typeof value === "object"){
-			var path = JSON.stringify(value);
-			path = path.replace(/":/g,"\\\.").replace(/{"/g,"").split("\\\.");
-			path.pop();
-			if(path.length){
-				for(var i = 0, len = path.length; i < len; i++){
-					value = value[path[i]];
-				}
-			}
-			k = prop+"-"+path.toString().replace(/,/g, "-");
-		}else{
-			k = prop;
-		}
-
-		if(k != "$ync"){
-			if(_dom[attr]){
-				Repaint(_dom[attr], value);   
-			}
-		}
-	}
-
-	function Diff(obj1, obj2, v) {
-		for (var prop in obj1) {
-			obj1.hasOwnProperty(prop) && prop != '__proto__' ? obj1[prop] != obj2[prop] ? DiffChanged(v, prop) : "" : "";
-		}
 	}
 
 	function Template(html, obj, id, idx){
@@ -152,18 +121,18 @@
 				key = key.replace(/ /g, "");
 			}
 			var _code = '\
-			var s = r[r.length-1];\
-			var key = s.match('+attrRe+');\
-			var $key = "'+key+'";\
-			if(s[s.length-1] == ">") { \
-				r[r.length-1] = s.replace(/>$/," _'+key+'>")\
-			}else if(key){\
-				key = key[key.length-1];\
-				var _key = key.replace("=\\\"", "").replace("=\\\'", "");\
-				_key = _key != $key ? "-"+$key+"=\\\""+_key+"\\\"" : "-"+_key;\
-				r[r.length-1] = s.replace(key, ""+_key+" "+key);\
-			};\
-			r.push(' + line + ');\n\n';
+				var s = r[r.length-1];\
+				var key = s.match('+attrRe+');\
+				var $key = "'+key+'";\
+				if(s[s.length-1] == ">") { \
+					r[r.length-1] = s.replace(/>$/," _'+key+'>")\
+				}else if(key){\
+					key = key[key.length-1];\
+					var _key = key.replace("=\\\"", "").replace("=\\\'", "");\
+					_key = _key != $key ? "-"+$key+"=\\\""+_key+"\\\"" : "-"+_key;\
+					r[r.length-1] = s.replace(key, ""+_key+" "+key);\
+				};\
+				r.push(' + line + ');\n\n';
 			var _line = 'r.push("' + line.replace(/"/g, '\\"') + '");\n';
 			js ? (code += _code) : (code += line != '' ? _line : '');
 			return add;
@@ -175,78 +144,6 @@
 		add(html.substr(cursor, html.length - cursor));
 		code += 'return r.join("");';
 		return new Function(code.replace(/[\r\t\n]/g, '')).apply(obj);
-	}
-
-	function Typeof_option(option){
-		return typeof option.option != "undefined" ? option.option : option;
-	}
-
-	function StorageChanged(e){
-		if(e.oldValue != e.newValue){
-			var newValue = typeof e.newValue != "undefined" && e.newValue != "" ? JSON.parse(e.newValue) : "";
-			var oldValue = typeof e.oldValue != "undefined" && e.oldValue != "" ? JSON.parse(e.oldValue) : "";
-
-			var key = e.key;
-				key = key.split("-!#");
-			var id = key[0];
-			var idx = key[1];
-			var option = new Object(options[id]);
-
-			if($ync || option.sync){
-				if(typeof idx != "undefined"){
-					var state = newValue ? newValue.$tate : "";
-					option.idx = idx*1;
-					option.type = state.type;
-
-					if(state.type === "add"){
-						option.insert = state.insert;
-						option.cache = false;
-						option.body = Template(option.template, newValue, id, idx, state.parent);
-						state.parent ? newValue.parent = state.parent : "";
-
-						Async(option, newValue);
-					}else if(state.type === "set"){
-						newValue.id = id;
-						newValue.idx = idx;
-						option.data = [newValue];
-						delete newValue.$tate;
-						Diff(newValue, oldValue, option);
-						Await();
-					}else if(!newValue){
-						option.type = "remove";
-						var _idx = index[id].indexOf(idx*1);
-						option.data = [newValue];
-
-						for (var property in dom[id][idx]) {
-							if(dom[id][idx].hasOwnProperty(property)){
-								if(property != "property"){
-									if(property.indexOf("on") == 0){
-										for(var e in dom[id][idx][property].events){
-											var type = dom[id][idx][property].events.type;
-											var handle = dom[id][idx][property].events.handle;
-											dom[id][idx][property].events.element.removeEventListener(type, handle);
-										}
-									}
-								}
-							}
-						}
-
-						dom[id][idx].node.parentNode.removeChild(dom[id][idx].node);
-						delete dom[id][idx];
-
-						index[id].splice(_idx, 1);
-
-						if(index[id].length == 0){
-							delete $for[id];
-						}
-
-						option.sync ? SetCookie(id, index[id]) : "";
-						Await();
-					}
-					ChangedItem(option);
-				}
-			}
-		}
 	}
 
 	function Render(option, data){
@@ -353,7 +250,12 @@
 						}else{
 							option.target.appendChild(element);
 						}
-						ChangedItem(option);
+						if($for[option.id]){
+						 	if($for[option.id].idx == $for[option.id].len){
+								ChangedItem(option);
+								Await();
+							}  
+						}
 					}
 				} 
 			}
@@ -361,7 +263,124 @@
 		parse(option.target, element, data);
 	}
 
-	function Async(option, data){
+	function Repaint(o, value){
+		var el = o.element;
+		var attr = o.attr;
+
+		if(attr == ""){
+			el.innerHTML = value;
+		}else if(attr == "value"){
+			el[attr] = value;
+		}else{
+			el.setAttribute(attr, value);
+		}
+		Await();
+	}
+
+	function DiffChanged(v, prop){
+		var id = v.id;
+		var value = v.data[0][prop];
+		var _dom = dom[v.id][v.idx];
+		var k = "";
+		var attr = prop;
+
+		if(typeof value === "object"){
+			var path = JSON.stringify(value);
+			path = path.replace(/":/g,"\\\.").replace(/{"/g,"").split("\\\.");
+			path.pop();
+			if(path.length){
+				for(var i = 0, len = path.length; i < len; i++){
+					value = value[path[i]];
+				}
+			}
+			k = prop+"-"+path.toString().replace(/,/g, "-");
+		}else{
+			k = prop;
+		}
+
+		if(k != "$ync"){
+			if(_dom[attr]){
+				Repaint(_dom[attr], value);   
+			}
+		}
+	}
+
+	function Diff(obj1, obj2, v) {
+		for (var prop in obj1) {
+			obj1.hasOwnProperty(prop) && prop != '__proto__' ? obj1[prop] != obj2[prop] ? DiffChanged(v, prop) : "" : "";
+		}
+	}
+
+	function StorageChanged(e){
+		if(e.oldValue != e.newValue){
+			Await.promise = true;
+			var newValue = typeof e.newValue != "undefined" && e.newValue != "" ? JSON.parse(e.newValue) : "";
+			var oldValue = typeof e.oldValue != "undefined" && e.oldValue != "" ? JSON.parse(e.oldValue) : "";
+
+			var key = e.key;
+				key = key.split("-!#");
+			var id = key[0];
+			var idx = key[1];
+			var option = new Object(options[id]);
+
+			if($ync || option.sync){
+				if(typeof idx != "undefined"){
+					var state = newValue ? newValue.$tate : "";
+					option.idx = idx*1;
+					option.type = state.type;
+
+					if(state.type === "add"){
+						option.insert = state.insert;
+						option.cache = false;
+						option.body = Template(option.template, newValue, id, idx, state.parent);
+						state.parent ? newValue.parent = state.parent : "";
+
+						Line(option, newValue);
+					}else if(state.type === "set"){
+						newValue.id = id;
+						newValue.idx = idx;
+						option.data = [newValue];
+						delete newValue.$tate;
+						Diff(newValue, oldValue, option);
+						Await();
+					}else if(!newValue){
+						option.type = "remove";
+						var _idx = index[id].indexOf(idx*1);
+						option.data = [newValue];
+
+						for (var property in dom[id][idx]) {
+							if(dom[id][idx].hasOwnProperty(property)){
+								if(property != "property"){
+									if(property.indexOf("on") == 0){
+										for(var e in dom[id][idx][property].events){
+											var type = dom[id][idx][property].events.type;
+											var handle = dom[id][idx][property].events.handle;
+											dom[id][idx][property].events.element.removeEventListener(type, handle);
+										}
+									}
+								}
+							}
+						}
+
+						dom[id][idx].node.parentNode.removeChild(dom[id][idx].node);
+						delete dom[id][idx];
+
+						index[id].splice(_idx, 1);
+
+						if(index[id].length == 0){
+							delete $for[id];
+						}
+
+						option.sync ? SetCookie(id, index[id]) : "";
+						Await();
+					}
+					ChangedItem(option);
+				}
+			}
+		}
+	}
+
+	function Line(option, data){
 		Render(option, data);
 
 		!option.cache ? option.insert == "prepend" ? index[option.id].unshift(option.idx) : index[option.id].push(option.idx) : "";
@@ -373,7 +392,6 @@
 				Loop(option.id);
 			}else{
 				delete option.cache;
-				ChangedItem(option);
 				Await();
 			}
 		}else if(option.sync){
@@ -390,6 +408,7 @@
 				type : typeof_array,
 				promise : undefined
 			};
+			Await();
 		}
 	}
 
@@ -405,36 +424,33 @@
 	}
 
 	function AddItem(option){
-		option = typeof_option(option);
-		if(Await({option: option, action:"addItem", timestamp : option.timestamp})){
-			typeof option.events != "undefined" ? events[option.id] = option.events : "";
-			typeof option.created != "undefined" ? option.created(option) : "";
-			typeof option.css != "undefined" ? SetStyle(option) : "";
+		typeof option.events != "undefined" ? events[option.id] = option.events : "";
+		typeof option.created != "undefined" ? option.created(option) : "";
+		typeof option.css != "undefined" ? SetStyle(option) : "";
 
-			typeof dom[option.id] == "undefined" ? dom[option.id] = {} : "";
-			typeof index[option.id] == "undefined" ? index[option.id] = [] : "";
+		typeof dom[option.id] == "undefined" ? dom[option.id] = {} : "";
+		typeof index[option.id] == "undefined" ? index[option.id] = [] : "";
 
-			index[option.id] = option.sync ? JSON.parse("["+GetCookie(option.id)+"]") : index[option.id];
-			var len = index[option.id].length;
+		index[option.id] = option.sync ? JSON.parse("["+GetCookie(option.id)+"]") : index[option.id];
+		var len = index[option.id].length;
 
-			if(len > 0 && option.sync){
-				option.data = [];
-				option.cache = true;
-				for(var i = 0; i < len; i++){
-					var idx = index[option.id][i];
-					var data = option.sync ? localStorage.getItem(option.id+"-!#"+[idx]) : sessionStorage.getItem(option.id+"-!#"+[idx]);
-					var obj = JSON.parse(data);
+		if(len > 0 && option.sync){
+			option.data = [];
+			option.cache = true;
+			for(var i = 0; i < len; i++){
+				var idx = index[option.id][i];
+				var data = option.sync ? localStorage.getItem(option.id+"-!#"+[idx]) : sessionStorage.getItem(option.id+"-!#"+[idx]);
+				var obj = JSON.parse(data);
 
-					if(obj){
-						typeof obj.$tate != "undefined" ? obj.parent = obj.$tate.parent : "";
-						option.data.push(obj);
-					}
+				if(obj){
+					typeof obj.$tate != "undefined" ? obj.parent = obj.$tate.parent : "";
+					option.data.push(obj);
 				}
-			}else{
-				option.cache = false;
 			}
-			return SyncItem(option);
+		}else{
+			option.cache = false;
 		}
+		return SyncItem(option);
 	}
 
 	function SyncItem(option){
@@ -512,14 +528,12 @@
 				data.id = option.id;
 				data.idx = option.idx;
 				data.parent = parent;
-				Async(option, data);
+				Line(option, data);
 			}
 		}
 	}
 
 	function SetItem(option){
-		option = typeof_option(option);
-		
 		typeof option.idx == "undefined" ? option.idx = 0 : "";
 		typeof option.template == "undefined" ? option.template = options[option.id].template : "";
 		var key = getIdx(option, option.idx);
@@ -533,17 +547,13 @@
 		var _newValue = JSON.stringify(newValue);
 
 		if(oldValue != _newValue){
-			if(Await({option: option, action: "setItem", timestamp : option.timestamp})){
-				typeof newValue.$tate == "undefined" ? newValue.$tate = { type : "set" } : newValue.$tate.type = "set";
-				_newValue = JSON.stringify(newValue);
-				sync ? $tore.localStorage.setItem(key, _newValue) : $tore.sessionStorage.setItem(key, _newValue);
-			}
+			typeof newValue.$tate == "undefined" ? newValue.$tate = { type : "set" } : newValue.$tate.type = "set";
+			_newValue = JSON.stringify(newValue);
+			sync ? $tore.localStorage.setItem(key, _newValue) : $tore.sessionStorage.setItem(key, _newValue);
 		}
-
 	}
 
 	function GetItems(option){
-		option = Typeof_option(option);
 		var data = [];
 		var id = option.id;
 		var item = index[id];
@@ -560,7 +570,6 @@
 	}
 
 	function GetItem(option){
-		option = Typeof_option(option);
 		var data = {};
 		var id = option.id;
 		var _dom = dom[id];
@@ -580,20 +589,23 @@
 		return data;
 	}
 
-	function RemoveItem(option){
+	function RemoveItem(option, clear){
 		var v, sync = options[option.id].sync;
 			v = sync ? $tore.localStorage.removeItem(option.id+"-!#"+option.idx) : $tore.sessionStorage.removeItem(option.id+"-!#"+option.idx);
+		!clear ? Await() : "";
 		return v;
 	}
 
 	function Clear(option){
-		var id = typeof option == "string" ? option : option.id;
+		var id = option.id;
 		var item = index[id];
 		var len = item ? item.length : false;
+		
 
 		if(len){
+			var end = len-1;
 			for(var i = 0; i < len; i++){
-				RemoveItem({id : id, idx : item[i]});
+				end == i ? RemoveItem({id : id, idx : item[i]}, true) : RemoveItem({id : id, idx : item[i]}, false); 
 			}
 		}
 
