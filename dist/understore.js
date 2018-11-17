@@ -4,7 +4,6 @@
 	(global.understore = factory());
 }(this, (function () { 'use strict';
 	var understore = {};
-	var a$ync = [];
 	var $tore, $ync = true;
 	var $dom, dom = {};
 	var options = {};
@@ -51,50 +50,50 @@
 		return receiver;
 	}
 
-	function Repaint(o, value){
-		var el = o.element;
-		var attr = o.attr;
+	function Await(o){
+		var len = 0;
+		if(o){
+			len = Await.promise ? Await.promise.length : Await.promise = [];
+			len = len.length;
 
-		if(attr == ""){
-		   el.innerHTML = value;
-		}else if(attr == "value"){
-			el[attr] = value;
+			if(o.timestamp){
+				return true;
+			}else{
+				o.timestamp = new Date().getTime();
+
+				len ? Await.promise.push(o) : Await.promise.push(false);
+
+				return !len;
+			}
 		}else{
-			el.setAttribute(attr, value);
+			Await.promise.sort(function (a, b) { 
+				return a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0;
+			});
+			var promise = Await.promise.shift();
+
+			if(promise){
+				understore[promise.action](promise);
+			}
 		}
-		removeAsync();
-	}
-
-	function removeAsync(){
-		a$ync.sort(function (a, b) { 
-			return a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0;
-		});
-
-		var _async = a$ync.shift();
-
-		if(_async){
-			understore[_async.action](_async);
-		}
-		
-	}
-
-	function addAsync(o){
-		var len = a$ync.length;
-
-		if(o.timestamp){
-			return true;
-		}else{
-			o.timestamp = new Date().getTime();
-
-			len ? a$ync.push(o) : "";
-			return len == 0;
-		}
-		
 	}
 
 	function typeof_option(option){
 		option = typeof option.option != "undefined" ? option.option : option;
 		return option;
+	}
+
+	function Repaint(o, value){
+		var el = o.element;
+		var attr = o.attr;
+
+		if(attr == ""){
+			el.innerHTML = value;
+		}else if(attr == "value"){
+			el[attr] = value;
+		}else{
+			el.setAttribute(attr, value);
+		}
+		Await();
 	}
 
 	function DiffChanged(v, prop){
@@ -161,7 +160,7 @@
 			}else if(key){\
 				key = key[key.length-1];\
 				var _key = key.replace("=\\\"", "").replace("=\\\'", "");\
-				_key = _key != $key ? "-"+$key+"=\\\""+_key+"\\\"" : "_"+_key;\
+				_key = _key != $key ? "-"+$key+"=\\\""+_key+"\\\"" : "-"+_key;\
 				r[r.length-1] = s.replace(key, ""+_key+" "+key);\
 			};\
 			r.push(' + line + ');\n\n';
@@ -212,7 +211,7 @@
 						option.data = [newValue];
 						delete newValue.$tate;
 						Diff(newValue, oldValue, option);
-						removeAsync();
+						Await();
 					}else if(!newValue){
 						option.type = "remove";
 						var _idx = index[id].indexOf(idx*1);
@@ -242,7 +241,7 @@
 						}
 
 						option.sync ? SetCookie(id, index[id]) : "";
-						removeAsync();
+						Await();
 					}
 					ChangedItem(option);
 				}
@@ -281,6 +280,7 @@
 				if (attributes){
 					for (var c = 0, len2 = attributes.length; c < len2; c++) {
 						var attribute = attributes[c];
+
 						if (attribute.specified) {
 							var name  = attribute.nodeName;
 							var value = attribute.nodeValue;
@@ -374,7 +374,7 @@
 			}else{
 				delete option.cache;
 				ChangedItem(option);
-				removeAsync();
+				Await();
 			}
 		}else if(option.sync){
 			var len = index[option.id].length;
@@ -406,7 +406,7 @@
 
 	function AddItem(option){
 		option = typeof_option(option);
-		if(addAsync({option: option, action:"addItem", timestamp : option.timestamp})){
+		if(Await({option: option, action:"addItem", timestamp : option.timestamp})){
 			typeof option.events != "undefined" ? events[option.id] = option.events : "";
 			typeof option.created != "undefined" ? option.created(option) : "";
 			typeof option.css != "undefined" ? SetStyle(option) : "";
@@ -499,7 +499,6 @@
 
 				_data = JSON.stringify(data);
 				sync ? $tore.localStorage.setItem(key, _data) : $tore.sessionStorage.setItem(key, _data);
-				removeAsync();
 				return {id : id , idx : idx};
 			}else{
 				var parent;
@@ -515,34 +514,31 @@
 				data.parent = parent;
 				Async(option, data);
 			}
-		
-		}else{
-			removeAsync();
 		}
 	}
 
 	function SetItem(option){
 		option = typeof_option(option);
 		
-			typeof option.idx == "undefined" ? option.idx = 0 : "";
-			typeof option.template == "undefined" ? option.template = options[option.id].template : "";
-			var key = getIdx(option, option.idx);
-			var sync = options[option.id].sync;
-			var newValue = option.data;
-			var oldValue = sync ? $tore.localStorage.getItem(key) : $tore.sessionStorage.getItem(key);
+		typeof option.idx == "undefined" ? option.idx = 0 : "";
+		typeof option.template == "undefined" ? option.template = options[option.id].template : "";
+		var key = getIdx(option, option.idx);
+		var sync = options[option.id].sync;
+		var newValue = option.data;
+		var oldValue = sync ? $tore.localStorage.getItem(key) : $tore.sessionStorage.getItem(key);
 
-			oldValue = JSON.parse(oldValue);
-			oldValue != null ? delete oldValue.$tate : "";
-			oldValue = JSON.stringify(oldValue);
-			var _newValue = JSON.stringify(newValue);
+		oldValue = JSON.parse(oldValue);
+		oldValue != null ? delete oldValue.$tate : "";
+		oldValue = JSON.stringify(oldValue);
+		var _newValue = JSON.stringify(newValue);
 
-			if(oldValue != _newValue){
-				if(addAsync({option: option, action: "setItem", timestamp : option.timestamp})){
-					typeof newValue.$tate == "undefined" ? newValue.$tate = { type : "set" } : newValue.$tate.type = "set";
-					_newValue = JSON.stringify(newValue);
-					sync ? $tore.localStorage.setItem(key, _newValue) : $tore.sessionStorage.setItem(key, _newValue);
-				}
+		if(oldValue != _newValue){
+			if(Await({option: option, action: "setItem", timestamp : option.timestamp})){
+				typeof newValue.$tate == "undefined" ? newValue.$tate = { type : "set" } : newValue.$tate.type = "set";
+				_newValue = JSON.stringify(newValue);
+				sync ? $tore.localStorage.setItem(key, _newValue) : $tore.sessionStorage.setItem(key, _newValue);
 			}
+		}
 
 	}
 
