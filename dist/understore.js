@@ -33,7 +33,7 @@
 			getItems : GetItems,
 			addItem : function(option){
 				option = Async(option, "addItem");
-				option ? AddItem(option) : "";
+				option ? Init(option) : "";
 			},
 			setItem : function(option){
 				option = Async(option, "setItem");
@@ -335,7 +335,7 @@
 						option.body = Template(option.template, newValue, id, idx, state.parent);
 						state.parent ? newValue.parent = state.parent : "";
 
-						Line(option, newValue);
+						Continue(option, newValue);
 					}else if(state.type === "set"){
 						newValue.id = id;
 						newValue.idx = idx;
@@ -380,7 +380,7 @@
 		}
 	}
 
-	function Line(option, data){
+	function Continue(option, data){
 		Render(option, data);
 
 		!option.cache ? option.insert == "prepend" ? index[option.id].unshift(option.idx) : index[option.id].push(option.idx) : "";
@@ -389,7 +389,7 @@
 		if(typeof $for[option.id] != "undefined" && $ync){
 			if($for[option.id].idx < $for[option.id].len){
 				$for[option.id].idx = $for[option.id].idx+1;
-				Loop(option.id);
+				While(option.id);
 			}else{
 				delete option.cache;
 				Await();
@@ -423,7 +423,7 @@
 		option.changed ? option.changed(option) : "";
 	}
 
-	function AddItem(option){
+	function Init(option){
 		typeof option.events != "undefined" ? events[option.id] = option.events : "";
 		typeof option.created != "undefined" ? option.created(option) : "";
 		typeof option.css != "undefined" ? SetStyle(option) : "";
@@ -450,10 +450,10 @@
 		}else{
 			option.cache = false;
 		}
-		return SyncItem(option);
+		return AddItem(option);
 	}
 
-	function SyncItem(option){
+	function AddItem(option){
 		if(typeof options[option.id] == "undefined"){
 			document.createElement(option.id);
 			options[option.id] = option;
@@ -481,12 +481,12 @@
 					type : typeof_array,
 					promise : undefined
 				};
-				return Loop(option.id);
+				return While(option.id);
 			}
 		}
 	}
 
-	function Loop(id){
+	function While(id){
 		var len = $for[id].len;
 		var option = $for[id].option;
 		var idx = $for[id].idx;
@@ -528,7 +528,7 @@
 				data.id = option.id;
 				data.idx = option.idx;
 				data.parent = parent;
-				Line(option, data);
+				Continue(option, data);
 			}
 		}
 	}
