@@ -1,80 +1,19 @@
 {
-  "_args": [
-    [
-      {
-        "raw": "understore",
-        "scope": null,
-        "escapedName": "understore",
-        "name": "understore",
-        "rawSpec": "",
-        "spec": "latest",
-        "type": "tag"
-      },
-      "/workspace/forum/understore"
-    ]
-  ],
-  "_from": "understore@latest",
-  "_id": "understore@0.1.2",
-  "_inCache": true,
-  "_location": "/understore",
-  "_nodeVersion": "9.2.1",
-  "_npmUser": {
-    "name": "understore",
-    "email": "sungu.che@gmail.com"
-  },
-  "_npmVersion": "6.4.1",
-  "_phantomChildren": {},
-  "_requested": {
-    "raw": "understore",
-    "scope": null,
-    "escapedName": "understore",
-    "name": "understore",
-    "rawSpec": "",
-    "spec": "latest",
-    "type": "tag"
-  },
-  "_requiredBy": [
-    "#USER"
-  ],
-  "_shasum": "2276268a56ece7b307a9d91356b9cf4fdda48f8a",
-  "_shrinkwrap": null,
-  "_spec": "understore",
-  "_where": "/workspace/forum/understore",
-  "author": {
-    "name": "che",
-    "email": "sungu.che@gmail.com",
-    "url": "http://understore.org"
-  },
-  "bugs": {
-    "url": "https://github.com/understore/understore/issues"
-  },
-  "dependencies": {},
-  "description": "high performance component UI library",
-  "devDependencies": {},
-  "directories": {},
-  "homepage": "https://github.com/understore/understore",
-  "keywords": [
-    "modern",
-    "ui",
-    "library"
-  ],
-  "license": "ISC",
-  "main": "index.js",
-  "maintainers": [
-    {
-      "name": "understore",
-      "email": "sungu.che@gmail.com"
-    }
-  ],
   "name": "understore",
-  "optionalDependencies": {},
-  "readme": "ERROR: No README data found!",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com:understore/understore.git"
-  },
+  "version": "0.1.4",
+  "description": "",
+  "main": "understore.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "0.1.2"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/understore/understore.github.io"
+  },
+  "author": "scv <sungu.che@gmail.com> (https://gitlab.com/scvjs/scv)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/understore/understore.github.io/issues"
+  },
+  "homepage": "https://understore.github.io"
 }
