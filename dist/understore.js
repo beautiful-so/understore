@@ -42,7 +42,7 @@
 			},
 			removeItem : function(option){
 				option = Async(option, "removeItem");
-				option ? RemoveItem() : "";
+				option ? RemoveItem(option) : "";
 			},
 			clear : function(option){
 				setTimeout(function(){Clear(option);}, 0);
