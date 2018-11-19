@@ -251,9 +251,7 @@
 							option.target.appendChild(element);
 						}
 
-						if($for[option.id].len == $for[option.id].idx){
-							Await();
-						}
+						Await();
 					}
 				} 
 			}
