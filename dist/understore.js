@@ -74,6 +74,7 @@
 				states = !Await.promise ? task = Await.tasks.push(o) : false;
 			}
 		}
+		window.stack = Await.tasks;
 
 		if(!task){
 			task = Await.tasks.shift();
@@ -249,7 +250,10 @@
 						}else{
 							option.target.appendChild(element);
 						}
-						Await();
+
+						if($for[option.id].len == $for[option.id].idx){
+							Await();
+						}
 					}
 				} 
 			}
@@ -403,6 +407,10 @@
 
 				_data = JSON.stringify(data);
 				sync ? $tore.localStorage.setItem(key, _data) : $tore.sessionStorage.setItem(key, _data);
+
+				if(len == idx){
+					Await();
+				}
 				return {id : id , idx : idx};
 			}else{
 				var parent;
@@ -418,7 +426,7 @@
 				data.parent = parent;
 				Continue(option, data);
 			}
-		}
+		}		
 	}
 
 	function Continue(option, data){
