@@ -54,35 +54,34 @@ __events__는 이벤트 바인딩이며 @click="function_name"으로 바인딩�
 
 &nbsp;
 
->__생성__에서의 필수옵션은 id, template, target, data이며
+__생성__에서의 필수옵션은 id, template, target, data이며
 추가 옵션은 events, css, sync 이며 아래 예제를 참조
 
 
->		_.addItem({ 
+>_.addItem({ 
 
->			id : "example_component", 
+>>id : "example_component", 
 
->			template : '<example_component><span>{this.text}</span></example_component>',
+>>template : '<example_component><span>{this.text}</span></example_component>',
 
->			css : "http://example.com/css/style.css",
+>>css : "http://example.com/css/style.css",
 
->			target : document.querySelector(".target"), 
+>>target : document.querySelector(".target"), 
 
->			data : {text : "hello world"} 
+>>data : {text : "hello world"} 
 
->		});
+>});
 
 &nbsp;
 
-> __추가__에서의 필수옵션은 id, data 이며 아래 예제를 참조
+__추가__에서의 필수옵션은 id, data 이며 아래 예제를 참조
 
->		_.addItem({ 
+>_.addItem({ 
+>>id : "example_component", 
+>>data : {text : "hello world"} 
 
->			id : "example_component", 
-
->			data : {text : "hello world"} 
-
->		});
+>});
+'''
 
 &nbsp;
 
