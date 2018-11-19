@@ -31,8 +31,9 @@
 			setCookie : SetCookie,
 			getItem : GetItem,
 			getItems : GetItems,
+			init : Init,
 			addItem : function(option){
-				option = Async(option, "addItem");
+				option = Async(option, "init");
 				option ? Init(option) : "";
 			},
 			setItem : function(option){
@@ -178,63 +179,61 @@
 					for (var c = 0, len2 = attributes.length; c < len2; c++) {
 						var attribute = attributes[c];
 
-						if (attribute.specified) {
-							var name  = attribute.nodeName;
-							var value = attribute.nodeValue;
+						var name  = attribute.nodeName;
+						var value = attribute.nodeValue;
 
-							if (name.indexOf("_") == 0){
-								var _name = name.replace("_", "");
-								var _value = attribute.nodeValue;
-								_dom[_name] = {
+						if (name.indexOf("_") == 0){
+							var _name = name.replace("_", "");
+							var _value = attribute.nodeValue;
+							_dom[_name] = {
+								element : childNode,
+								attr : _value,
+								event : {}
+							};
+							setTimeout(function(childNode, name){
+								childNode.removeAttribute(name);
+							}, 0, childNode, name);
+						}
+
+						if(name.indexOf("-") == 0){
+							var _name = name.replace("-", "");
+							var _value = attribute.nodeValue;
+							_dom[_name] = {
+								element : childNode,
+								attr : _value,
+								event : {}
+							};
+							setTimeout(function(childNode, name){
+								childNode.removeAttribute(name);
+							}, 0, childNode, name);
+						}
+
+						if(name.indexOf("on") == 0){
+							var _value = attribute.nodeValue;
+							var _option = JSON.stringify(option);
+								_option = JSON.parse(_option);
+							var handle = eventBind(event, element, option, _option, _value);
+
+							childNode.addEventListener(name.replace("on", ""), handle);
+							if(_dom[name]){
+								_dom[name].events = {
+									type : name.replace("on", ""),
 									element : childNode,
-									attr : _value,
-									event : {}
+									handle : handle
 								};
-								setTimeout(function(childNode, name){
-									childNode.removeAttribute(name);
-								}, 0, childNode, name);
-							}
-
-							if(name.indexOf("-") == 0){
-								var _name = name.replace("-", "");
-								var _value = attribute.nodeValue;
-								_dom[_name] = {
-									element : childNode,
-									attr : _value,
-									event : {}
-								};
-								setTimeout(function(childNode, name){
-									childNode.removeAttribute(name);
-								}, 0, childNode, name);
-							}
-
-							if(name.indexOf("on") == 0){
-								var _value = attribute.nodeValue;
-								var _option = JSON.stringify(option);
-									_option = JSON.parse(_option);
-								var handle = eventBind(event, element, option, _option, _value);
-
-								childNode.addEventListener(name.replace("on", ""), handle);
-								if(_dom[name]){
-									_dom[name].events = {
+							}else{
+								_dom[name] = {
+									events : {
 										type : name.replace("on", ""),
 										element : childNode,
 										handle : handle
-									};
-								}else{
-									_dom[name] = {
-										events : {
-											type : name.replace("on", ""),
-											element : childNode,
-											handle : handle
-										}
-									};
-								}
-
-								setTimeout(function(childNode, name){
-									childNode.removeAttribute(name);
-								}, 0, childNode, name);
+									}
+								};
 							}
+
+							setTimeout(function(childNode, name){
+								childNode.removeAttribute(name);
+							}, 0, childNode, name);
 						}
 					}
 				}
@@ -250,12 +249,7 @@
 						}else{
 							option.target.appendChild(element);
 						}
-						if($for[option.id]){
-						 	if($for[option.id].idx == $for[option.id].len){
-								ChangedItem(option);
-								Await();
-							}  
-						}
+						Await();
 					}
 				} 
 			}
@@ -267,12 +261,11 @@
 		var el = o.element;
 		var attr = o.attr;
 
-		if(attr == ""){
-			el.innerHTML = value;
-		}else if(attr == "value"){
+		if(attr){
 			el[attr] = value;
-		}else{
 			el.setAttribute(attr, value);
+		}else{
+			el.innerHTML = value;
 		}
 		Await();
 	}
@@ -380,6 +373,54 @@
 		}
 	}
 
+	function While(id){
+		var len = $for[id].len;
+		var option = $for[id].option;
+		var idx = $for[id].idx;
+		var sync = options[id].sync;
+
+		if(typeof dom[option.id] != "undefined" && !option.cache){
+			option.idx = Object.keys(dom[id]).length;
+		}else if(typeof index[option.id] != "undefined"){
+			typeof index[option.id][idx] != "undefined" ? option.idx = index[option.id][idx]*1 : option.idx = idx;
+		}else{
+			option.idx = idx;
+		}
+		var key = getIdx(option, idx);
+		var data = option.data[($for[id].type ? 0 : idx)];
+
+		if(data){
+			!sync ? data.$ync = Math.random().toString(36).substring(7) : "";
+			var _data = JSON.stringify(data);
+
+			if(!option.cache){
+				data.$tate = {
+					type : "add",
+					parent : option.parent,
+					insert : option.insert
+				};
+				data.parent = option.parent;
+
+				_data = JSON.stringify(data);
+				sync ? $tore.localStorage.setItem(key, _data) : $tore.sessionStorage.setItem(key, _data);
+				return {id : id , idx : idx};
+			}else{
+				var parent;
+				if(typeof data.$tate != "undefined"){
+					parent = data.$tate.parent; 
+					option.insert = data.$tate.insert;
+				}
+
+				option.body = Template(option.template, data, option.id, option.idx, parent);
+				option.cache = true;
+				data.id = option.id;
+				data.idx = option.idx;
+				data.parent = parent;
+				Continue(option, data);
+			}
+		}
+	}
+
 	function Continue(option, data){
 		Render(option, data);
 
@@ -409,7 +450,7 @@
 				promise : undefined
 			};
 			Await();
-		}
+		}		
 	}
 
 	function getIdx(option, idx){
@@ -458,9 +499,11 @@
 			document.createElement(option.id);
 			options[option.id] = option;
 		}
+
 		if(typeof option.data != "undefined"){
 			var typeof_array = typeof option.data.length == "undefined";
-			typeof_array ? option.data = [option.data] : "";
+			option.data = typeof_array ? [option.data] : option.data;
+
 			if(option.data.length > 0){
 				var len = option.data.length-1;
 				var for_type = typeof $for[option.id] == "undefined";
@@ -482,53 +525,6 @@
 					promise : undefined
 				};
 				return While(option.id);
-			}
-		}
-	}
-
-	function While(id){
-		var len = $for[id].len;
-		var option = $for[id].option;
-		var idx = $for[id].idx;
-		var sync = options[id].sync;
-
-		if(typeof dom[option.id] != "undefined" && !option.cache){
-			option.idx = Object.keys(dom[id]).length;
-		}else if(typeof index[option.id] != "undefined"){
-			typeof index[option.id][idx] != "undefined" ? option.idx = index[option.id][idx]*1 : option.idx = idx;
-		}else{
-			option.idx = idx;
-		}
-		var key = getIdx(option, idx);
-		var data = option.data[($for[id].type ? 0 : idx)];
-		if(data){
-			!sync ? data.$ync = Math.random().toString(36).substring(7) : "";
-			var _data = JSON.stringify(data);
-
-			if(!option.cache){
-				data.$tate = {
-					type : "add",
-					parent : option.parent,
-					insert : option.insert
-				};
-				data.parent = option.parent;
-
-				_data = JSON.stringify(data);
-				sync ? $tore.localStorage.setItem(key, _data) : $tore.sessionStorage.setItem(key, _data);
-				return {id : id , idx : idx};
-			}else{
-				var parent;
-				if(typeof data.$tate != "undefined"){
-					parent = data.$tate.parent; 
-					option.insert = data.$tate.insert;
-				}
-
-				option.body = Template(option.template, data, option.id, option.idx, parent);
-				option.cache = true;
-				data.id = option.id;
-				data.idx = option.idx;
-				data.parent = parent;
-				Continue(option, data);
 			}
 		}
 	}
@@ -575,13 +571,13 @@
 		var _dom = dom[id];
 
 		if(typeof _dom != "undefined"){
-			typeof option.idx == "undefined" ? option.idx = 0 : "";
+			var idx = option.idx ? option.idx : 0;
 			var len = Object.keys(_dom).length-1;
 			var sync = options[id].sync;
-			var d = sync ? localStorage.getItem(id+"-!#"+option.idx) : sessionStorage.getItem(id+"-!#"+option.idx);
+			var d = sync ? localStorage.getItem(id+"-!#"+idx) : sessionStorage.getItem(id+"-!#"+idx);
 				d = d ? JSON.parse(d) : null;
 
-			data = {data : d, element : _dom[option.idx].node, id : id, idx : option.idx};
+			data = {data : d, element : _dom[idx].node, id : id, idx : idx};
 		}else{
 			data = null;
 		}
