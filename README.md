@@ -181,8 +181,6 @@ getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 타겟 엘리먼�
 
 >>element : {component element}
 
->>parent : {component parent}
-
 >>[more event params](https://developer.mozilla.org/ko/docs/Web/API/Event)
 
 >}
