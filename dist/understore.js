@@ -74,7 +74,6 @@
 				states = !Await.promise ? task = Await.tasks.push(o) : false;
 			}
 		}
-		window.stack = Await.tasks;
 
 		if(!task){
 			task = Await.tasks.shift();
@@ -163,6 +162,9 @@
 				event.idx = _option.idx;
 				event.element = element;
 				event.data = o.data;
+				if(_option.parent){
+					event.parent = GetItem(_option.parent);
+				}
 				option.events[_value](event);
 			};
 		}
@@ -294,8 +296,10 @@
 		}
 
 		if(k != "$ync"){
-			if(_dom[attr]){
-				Repaint(_dom[attr], value);   
+			if(_dom){
+				if(_dom[attr]){
+					Repaint(_dom[attr], value);   
+				}
 			}
 		}
 	}
@@ -421,7 +425,7 @@
 				option.cache = true;
 				data.id = option.id;
 				data.idx = option.idx;
-				data.parent = parent;
+				option.parent = parent;
 				Continue(option, data);
 			}
 		}		

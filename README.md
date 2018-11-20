@@ -1,17 +1,19 @@
-# [Understore](https://www.npmjs.com/package/understore)
+## [Understore](https://www.npmjs.com/package/understore) 
 
-**5가지 함수로 확장가능한 웹 컴포넌트 개발을 시작하세요.**
+**5가지 함수로 확장가능한 웹 컴포넌트 개발**
 
-Understore의 API [추가, 가져오기, 모두가져오기, 삭제, 모두삭제] 총 5개이며 추가로 2개의 유틸리티를 제공하며 웹 개발이 가장 힘든 부분인 컴포넌트가 확장되면 확장될수록 컴포넌트간의 상태관리의 높은 러닝커브와 유지보수의 어려움을 해결하기 위한 라이브러리입니다. **IE9** 레거시 브라우저를 지원하며, 백그라운드 스토어 에코시스템을 기반으로 창과 창간의 컴포넌트의 상태관리의 최신화를 가능하게 합니다.
+Understore의 API 간결하고 직관적입니다. [추가, 가져오기, 모두가져오기, 삭제, 모두삭제] 총 5개이며 추가로 2개의 유틸리티를 제공하며 웹 개발이 가장 힘든 부분인 컴포넌트가 확장되면 확장될수록 컴포넌트간의 상태관리의 높은 러닝커브와 유지보수의 어려움을 해결하기 위한 라이브러리입니다. **IE9** 레거시 브라우저를 지원하며, 백그라운드 스토어 에코시스템을 기반으로 창과 창간의 컴포넌트의 상태관리의 최신화를 가능하게 합니다.
 
 자세한 내용은 아래 API 문서와 예제를 참조해주세요
 
-## _.addItem
+## API
+
+### _.addItem
 
 addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 
-**parameter** : [type object]
+**parameter** : type object
 
 >	{
 
@@ -21,7 +23,13 @@ addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 >>	target : {dom.element}
 
->>  parent : {object} // 컴포넌트간 호환하여 확장할때 사용합니다. {id : "아이디명", idx : "해당 아이템 idx값"}
+>>  parent : {
+
+>>> id : {string} 
+
+>>> idx : {number}
+
+>>} 
 
 >>	data : { object }
 
@@ -31,8 +39,13 @@ addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 >}
 
-**return** : [type undefined]
-undefined
+**return** : type object
+>{
+>> id : {string}
+
+>> idx : {number}
+
+>}
 
 &nbsp;
 
@@ -60,17 +73,35 @@ undefined
 추가 옵션은 events, css, sync 이며 아래 예제를 참조
 
 
->_.addItem({ 
+> _.addItem({ 
 
->>id : "example_component", 
+>> id : "example_component", 
 
->>template : '<example_component><span>{this.text}</span></example_component>',
+>> template : '<example_component><span>{this.text}</span></example_component>',
 
->>css : "http://example.com/css/style.css",
+>> css : "http://example.com/css/style.css",
 
->>target : document.querySelector(".target"), 
+>> target : document.querySelector(".target"), 
 
->>data : {text : "hello world"} 
+>> data : {text : "hello world"},
+
+>> parent : {
+
+>>> id: {string}
+
+>>> idx : {number}
+
+>> },
+
+>> events : {
+
+>>> onEvent : {
+
+>>>>function(event){ } 
+
+>>>}
+
+>>}
 
 >});
 
@@ -80,10 +111,19 @@ undefined
 
 >_.addItem({ 
 >>id : "example_component", 
->>data : {text : "hello world"} 
+
+>>data : {text : "hello world"},
+
+>> parent : {
+
+>>> id: {string}
+
+>>> idx : {number}
+
+>> }
 
 >});
-'''
+
 
 &nbsp;
 
@@ -91,17 +131,17 @@ undefined
 
 setItem은 컴포넌트의 **수정**에 사용됩니다.
 
-**parameter** : [type object]
+**parameter** : type object
 >	{
->> id: { string }
+>> id: {string}
 
->>	idx : { num } // idx default : 0
+>>	idx : {number} // idx default : 0
 
->> data : { object }
+>> data : {object}
 
 >}
 
-**return** : [type undefined]
+**return** : type undefined
 undefined
 
 
@@ -120,14 +160,14 @@ _.setItem({
 
 ## _.getItem
 
-getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 타겟 엘리먼트**의 값을 가져오는데 사용됩니다.
+getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 타겟 엘리먼트, 부모 컴포넌트**의 값을 가져오는데 사용됩니다.
 
-**parameter** : [type object]
+**parameter** : type object
 > {
 
->> id : { string },
+>> id : {string},
 
->> idx : { number }
+>> idx : {number}
 
 >}
 
@@ -140,6 +180,8 @@ getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 타겟 엘리먼�
 >>data : {object}
 
 >>element : {component element}
+
+>>parent : {component parent}
 
 >>[more event params](https://developer.mozilla.org/ko/docs/Web/API/Event)
 
@@ -161,9 +203,9 @@ console.log(item);
 
 ## _.getItems
 
-getItems은 컴포넌트  **getItem**의 확장 유틸리티로 배열로 값을 가져오는데 사용됩니다.
+getItems은 컴포넌트  **getItem**의 확장 유틸리티로 컴포넌트의 정보를 배열 값으로 모두 가져오는데 사용됩니다.
 
-**parameter** : [type object]
+**parameter** : type object
 > {
 
 >> id : { string }
@@ -195,13 +237,12 @@ getItems은 컴포넌트  **getItem**의 확장 유틸리티로 배열로 값을
 >]
 
 ```
-var item = _.getItem({
-	id : "example_component",
-	idx : 1
+var item = _.getItems({
+	id : "example_component"
 });
   
 console.log(item);
-=> { Event object......, data : addItem add data!, elment : ▶<example_component>...</example_component>  }
+=> [Array Extend event object]
 
 
 ```
@@ -211,7 +252,7 @@ console.log(item);
 
 removeItem은 컴포넌트를  **삭제**의 할때 사용되며 해당 컴포넌트, 바인딩된 이벤트, 데이터를 한번에 삭제합니다.
 
-**parameter** : [type object]
+**parameter** : type object
 
 >{ 
 >>id : "example_component", 
@@ -220,7 +261,7 @@ removeItem은 컴포넌트를  **삭제**의 할때 사용되며 해당 컴포�
 
 >};
 
-**return** : [type undefined]
+**return** : type undefined
 
 ```
 _.removeItem({ 
@@ -237,13 +278,13 @@ _.removeItem({
 
 clear는 removeItem 확장 유틸리티로 컴포넌트를  **모두삭제**의 할때 사용되며 모든 컴포넌트, 바인딩된 이벤트, 데이터를 한번에 삭제합니다.
 
-**parameter** : [type string]
+**parameter** : type string
 >{
 >> id : {string}
 
 >}
 
-**return** : [type number]
+**return** : type number
 
 ```
 var item = _.clear({id: “example_component”});
