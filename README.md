@@ -52,7 +52,7 @@ undefined
 
 **events**는 이벤트 바인딩이며 @click="function_name"으로 바인딩이 가능하며 아래 예제를 참조
 
->[event bind on jsbin](https://jsfiddle.net/understore/z8c9ngku/)
+>[event bind on jsfiddle](https://jsfiddle.net/understore/z8c9ngku/)
 
 &nbsp;
 
