@@ -8,7 +8,7 @@ Understore의 API [추가, 가져오기, 모두가져오기, 삭제, 모두삭�
 
 ## _.addItem
 
-_.addItem은 웹컴포넌트의 **생성**과 **추가**에 사용됩니다.
+addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 
 **parameter** : [type object]
@@ -89,6 +89,8 @@ undefined
 
 ## _.setItem
 
+setItem은 컴포넌트의 **수정**에 사용됩니다.
+
 **parameter** : [type object]
 >	{
 >> id: { string }
@@ -118,21 +120,30 @@ _.setItem({
 
 ## _.getItem
 
+getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 타겟 엘리먼트**의 값을 가져오는데 사용됩니다.
 
 **parameter** : [type object]
 > {
 
 >> id : { string },
 
->> data : { object }
+>> idx : { number }
 
 >}
 
-**return** : [event object] 확장으로 [data, element]
-{
-	data : { object },
-	el : { dom.element 
-}
+**return** : [Extend event object ]
+
+>event :{
+
+>>target : {element}
+
+>>data : {object}
+
+>>element : {component element}
+
+>>[more event params](https://developer.mozilla.org/ko/docs/Web/API/Event)
+
+>}
 
 ```
 var item = _.getItem({
@@ -146,21 +157,68 @@ console.log(item);
 
 ```
 
+&nbsp;
 
+## _.getItems
+
+getItems은 컴포넌트  **getItem**의 확장 유틸리티로 배열로 값을 가져오는데 사용됩니다.
+
+**parameter** : [type object]
+> {
+
+>> id : { string }
+
+>}
+
+**return** : [Array Extend event object ]
+
+>[
+
+>>event :{
+
+>>>target : {element}
+
+>>>data : {object}
+
+>>>element : {component element}
+
+>>>[more event params](https://developer.mozilla.org/ko/docs/Web/API/Event)
+
+>>}
+
+>> event : {same object}
+
+>> event : {same object}
+
+>> more ...
+
+>]
+
+```
+var item = _.getItem({
+	id : "example_component",
+	idx : 1
+});
+  
+console.log(item);
+=> { Event object......, data : addItem add data!, elment : ▶<example_component>...</example_component>  }
+
+
+```
 
 &nbsp;
 ## _.removeItem
 
+removeItem은 컴포넌트를  **삭제**의 할때 사용되며 해당 컴포넌트, 바인딩된 이벤트, 데이터를 한번에 삭제합니다.
 
+**parameter** : [type object]
 
-parameter : [type object]
-
->_.removeItem({ 
+>{ 
 >>id : "example_component", 
 
 >>idx : 2
 
->});
+>};
 
 **return** : [type undefined]
 
@@ -177,6 +235,8 @@ _.removeItem({
 
 ## _.clear
 
+clear는 removeItem 확장 유틸리티로 컴포넌트를  **모두삭제**의 할때 사용되며 모든 컴포넌트, 바인딩된 이벤트, 데이터를 한번에 삭제합니다.
+
 **parameter** : [type string]
 >{
 >> id : {string}
@@ -184,11 +244,6 @@ _.removeItem({
 >}
 
 **return** : [type number]
-{
-	data : { object },
-	el : { dom.element }
-}
-
 
 ```
 var item = _.clear({id: “example_component”});
