@@ -45,7 +45,7 @@
 				option ? RemoveItem(option) : "";
 			},
 			clear : function(option){
-				setTimeout(function(){Clear(option);}, 0);
+				Clear(option);
 			}
 		};
 
@@ -271,7 +271,6 @@
 		}else{
 			el.innerHTML = value;
 		}
-		Await();
 	}
 
 	function DiffChanged(v, prop){
@@ -296,12 +295,14 @@
 		}
 
 		if(k != "$ync"){
+			attr = attr.toLowerCase();
 			if(_dom){
 				if(_dom[attr]){
 					Repaint(_dom[attr], value);   
 				}
 			}
 		}
+		Await();
 	}
 
 	function Diff(obj1, obj2, v) {
