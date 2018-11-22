@@ -1,15 +1,19 @@
-Understore의 API 간결하고 직관적입니다. 
-
 **[추가, 가져오기, 모두가져오기, 삭제, 모두삭제]** 5개의 API를 활용한 개발은
 
 확장 컴포넌트간의 상태관리 및 유지보수의 용이성을 제공합니다.
 
-**IE9** 레거시 브라우저를 지원하며, 
+**백그라운드 스토어** 에코시스템 기반의 **데이터 상태관리**를 사용하며 상태관리를 하며
 
-**백그라운드 스토어** 에코시스템을 기반으로 창과 창간의 컴포넌트의 상태관리의 최신화를 가능하게 합니다.
+>데이터의 업데이트에 따라 **각 탭**에 있는  **Virual Dom** 기반의 동일한 웹 컴포넌트의 데이터 싱크를 유지가능하게 해줍니다
 
+>SNS 알림, 메일 알림등	탭간 다르게 보여지는 각 상태를 **새로고침 없이 동기화**를 가능하게 합니다.
+
+&nbsp;
 
 자세한 내용은 아래 API 문서와 예제를 참조해주세요
+
+>**IE9** 레거시 브라우저를 지원 및 chrome, firefox, safari에서 사용가능합니다.
+
 
 ## API
 
@@ -20,33 +24,33 @@ addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 **parameter** : type object
 
->	{
+>{
 
->>	id: { string },
+>>id: {string},
 
->>	template : {string}
+>>template : {string},
 
->>	target : {dom.element}
+>>target : {dom.element},
 
->>  parent : {
+>>parent : {
 
->>> id : {string} 
+>>>id : {string},
 
->>> idx : {number}
+>>>idx : {number}
 
->>} 
+>>},
 
->>	data : { object }
+>>data : {object},
 
->>	created : { function }
+>>created : {function},
 
->>	changed : { function }
+>>changed : {function}
 
 >}
 
 **return** : type object
 >{
->> id : {string}
+>> id : {string},
 
 >> idx : {number}
 
@@ -92,7 +96,7 @@ addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 >> parent : {
 
->>> id: {string}
+>>> id: {string},
 
 >>> idx : {number}
 
@@ -121,7 +125,7 @@ addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 >> parent : {
 
->>> id: {string}
+>>> id: {string},
 
 >>> idx : {number}
 
@@ -137,10 +141,10 @@ addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 setItem은 컴포넌트의 **수정**에 사용됩니다.
 
 **parameter** : type object
->	{
->> id: {string}
+>{
+>>id: {string},
 
->>	idx : {number} // idx default : 0
+>>idx : {number}, // idx default : 0
 
 >> data : {object}
 
@@ -168,11 +172,11 @@ _.setItem({
 getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 타겟 엘리먼트, 부모 컴포넌트**의 값을 가져오는데 사용됩니다.
 
 **parameter** : type object
-> {
+>{
 
->> id : {string},
+>>id : {string},
 
->> idx : {number}
+>>idx : {number}
 
 >}
 
@@ -180,11 +184,11 @@ getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 타겟 엘리먼�
 
 >event :{
 
->>target : {element}
+>>target : {element},
 
->>data : {object}
+>>data : {object},
 
->>element : {component element}
+>>element : {component element},
 
 >>[more event params](https://developer.mozilla.org/ko/docs/Web/API/Event)
 
@@ -221,19 +225,19 @@ getItems은 컴포넌트  **getItem**의 확장 유틸리티로 컴포넌트의 
 
 >>event :{
 
->>>target : {element}
+>>>target : {element},
 
->>>data : {object}
+>>>data : {object},
 
->>>element : {component element}
+>>>element : {component element},
 
 >>>[more event params](https://developer.mozilla.org/ko/docs/Web/API/Event)
 
 >>}
 
->> event : {same object}
+>> event : {same object},
 
->> event : {same object}
+>> event : {same object},
 
 >> more ...
 
