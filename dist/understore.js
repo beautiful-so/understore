@@ -165,6 +165,7 @@
 				if(_option.parent){
 					event.parent = GetItem(_option.parent);
 				}
+				Await.tasks = [];
 				option.events[_value](event);
 			};
 		}
@@ -607,7 +608,6 @@
 		var id = option.id;
 		var item = index[id];
 		var len = item ? item.length : false;
-		
 
 		if(len){
 			var end = len-1;
