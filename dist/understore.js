@@ -216,7 +216,7 @@
 							var _value = attribute.nodeValue;
 							var _option = JSON.stringify(option);
 								_option = JSON.parse(_option);
-							var handle = eventBind(event, element, option, _option, _value);
+							var handle = eventBind(window.event, element, option, _option, _value);
 
 							childNode.addEventListener(name.replace("on", ""), handle);
 							if(_dom[name]){
