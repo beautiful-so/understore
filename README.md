@@ -22,52 +22,59 @@
 addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 
-**parameter** : type object
+**parameter** : {
 
->{
+>id: {string},
 
->>id: {string},
+>template : {string},
 
->>template : {string},
+>target : {dom.element},
 
->>target : {dom.element},
+>parent : {
 
->>parent : {
+>>id : {string},
 
->>>id : {string},
+>>idx : {number}
 
->>>idx : {number}
+>},
 
->>},
+>data : {object},
 
->>data : {object},
+>created : {function},
 
->>created : {function},
+>changed : {function},
 
->>changed : {function}
+>css : {url address}
 
->}
+}
 
-**return** : type object
->{
->> id : {string},
+**return** : {
+> id : {string},
 
->> idx : {number}
+> idx : {number}
 
->}
+}
 
 &nbsp;
 
 
 
-**template** 과 **data**의 사용법은 script 태그 내에 삽입하는 방식과 자바스크립트 변수안에 템플릿을 삽입하는 방식을 사용하고 있으며 virtual dom 방식의 dom관리를 통해 스토어의 수정 발생시 템플릿의 해당 보간자 영역의 repaint의 가벼운 수정 방식을 사용하고 있습니다.
+**template** 과 **data** 바인딩
+
+>script 태그 내에 삽입하는 방식과 자바스크립트 변수안에 템플릿을 삽입하는 방식을 사용하고 있으며 
+
+>virtual dom 방식의 dom관리를 통해 스토어의 수정 발생시 템플릿의 해당 보간자 영역의 repaint의 가벼운 수정 방식을 사용하고 있습니다.
 
 > [template type1 on jsfiddle](https://jsfiddle.net/understore/xjgxouLa/)
 
 > [template type2 on jsfiddle](https://jsfiddle.net/understore/bzvxvL1w/)
 
 
-**css** 는 스타일 파일의 경로를 넣으면 됩니다., 경우 스타일과 중복되지 않도록 scoped 가능한 css import 방식을 제공하고 있습니다. (스타일 사용의 방식은 custom element 셀렉터 사용시 :root로 사용가능합니다.)
+**css**
+
+>스타일은 css 파일의 경로 넣어 사용되며, 스타일 모듈화는 스타일과 중복되지 않도록 scoped 방식을 채용하고 있으며 있습니다. 
+
+>컴포넌트(custom element) 셀렉터는 **:root** 입니다 
 
 >[css import on jsfiddle](https://jsfiddle.net/understore/4y78mtpj/)
 
@@ -82,56 +89,56 @@ addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 추가 옵션은 events, css, sync 이며 아래 예제를 참조
 
 
-> _.addItem({ 
+_.addItem({ 
 
->> id : "example_component", 
+> id : "example_component", 
 
->> template : '<example_component><span>{this.text}</span></example_component>',
+> template : '<example_component><span>{this.text}</span></example_component>',
 
->> css : "http://example.com/css/style.css",
+> css : "http://example.com/css/style.css",
 
->> target : document.querySelector(".target"), 
+> target : document.querySelector(".target"), 
 
->> data : {text : "hello world"},
+> data : {text : "hello world"},
 
->> parent : {
+> parent : {
 
->>> id: {string},
+>> id: {string},
 
->>> idx : {number}
+>> idx : {number}
 
->> },
+> },
 
->> events : {
+> events : {
 
->>> onEvent : {
+>> onEvent : {
 
->>>>function(event){ } 
-
->>>}
+>>>function(event){ } 
 
 >>}
 
->});
+>}
+
+});
 
 &nbsp;
 
 **추가**에서의 필수옵션은 id, data 이며 아래 예제를 참조
 
->_.addItem({ 
->>id : "example_component", 
+_.addItem({ 
+>id : "example_component", 
 
->>data : {text : "hello world"},
+>data : {text : "hello world"},
 
->> parent : {
+> parent : {
 
->>> id: {string},
+>> id: {string},
 
->>> idx : {number}
+>> idx : {number}
 
->> }
+> }
 
->});
+});
 
 
 &nbsp;
@@ -140,15 +147,14 @@ addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 setItem은 컴포넌트의 **수정**에 사용됩니다.
 
-**parameter** : type object
->{
->>id: {string},
+**parameter** : {
+>id: {string},
 
->>idx : {number}, // idx default : 0
+>idx : {number}, // idx default : 0
 
->> data : {object}
+> data : {object}
 
->}
+}
 
 **return** : type undefined
 undefined
@@ -169,30 +175,27 @@ _.setItem({
 
 ## _.getItem
 
-getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 타겟 엘리먼트, 부모 컴포넌트**의 값을 가져오는데 사용됩니다.
+getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 부모 컴포넌트(확장된 컴포넌트일 경우)**의 값을 가져오는데 사용됩니다.
 
-**parameter** : type object
->{
+**parameter** : {
 
->>id : {string},
+>id : {string},
 
->>idx : {number}
+>idx : {number}
 
->}
+}
 
-**return** : [Extend event object ]
+**return** : {
 
->event :{
+>target : {element},
 
->>target : {element},
+>data : {object},
 
->>data : {object},
+>element : {component element},
 
->>element : {component element},
+>[event params...](https://developer.mozilla.org/ko/docs/Web/API/Event)
 
->>[more event params](https://developer.mozilla.org/ko/docs/Web/API/Event)
-
->}
+}
 
 ```
 var item = _.getItem({
@@ -212,36 +215,33 @@ console.log(item);
 
 getItems은 컴포넌트  **getItem**의 확장 유틸리티로 컴포넌트의 정보를 배열 값으로 모두 가져오는데 사용됩니다.
 
-**parameter** : type object
-> {
+**parameter** : {
 
->> id : { string }
+> id : { string }
+
+}
+
+**return** : [
+
+>event :{
+
+>>target : {element},
+
+>>data : {object},
+
+>>element : {component element},
+
+>>[event params...](https://developer.mozilla.org/ko/docs/Web/API/Event)
 
 >}
 
-**return** : [Array Extend event object ]
+> event : {same object},
 
->[
+> event : {same object},
 
->>event :{
+> more ...
 
->>>target : {element},
-
->>>data : {object},
-
->>>element : {component element},
-
->>>[more event params](https://developer.mozilla.org/ko/docs/Web/API/Event)
-
->>}
-
->> event : {same object},
-
->> event : {same object},
-
->> more ...
-
->]
+]
 
 ```
 var item = _.getItems({
@@ -259,14 +259,12 @@ console.log(item);
 
 removeItem은 컴포넌트를  **삭제**의 할때 사용되며 해당 컴포넌트, 바인딩된 이벤트, 데이터를 한번에 삭제합니다.
 
-**parameter** : type object
+**parameter** : { 
+>id : "example_component", 
 
->{ 
->>id : "example_component", 
+>idx : 2
 
->>idx : 2
-
->};
+};
 
 **return** : type undefined
 
@@ -285,11 +283,10 @@ _.removeItem({
 
 clear는 removeItem 확장 유틸리티로 컴포넌트를  **모두삭제**의 할때 사용되며 모든 컴포넌트, 바인딩된 이벤트, 데이터를 한번에 삭제합니다.
 
-**parameter** : type string
->{
->> id : {string}
+**parameter** : {
+> id : {string}
 
->}
+}
 
 **return** : type number
 
