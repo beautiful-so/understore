@@ -303,5 +303,5 @@ console.log(item);
 
 ## 예제
 
-[Todomvc example on jsfiddle](https://jsfiddle.net/understore/x2seku4z/)
+[Todomvc example on jsfiddle](https://fiddle.jshell.net/understore/x2seku4z/show/light/)
 >창 혹은 탭을 두개 여시고 컴포넌트간의 데이터의 동기화를 확인하세요

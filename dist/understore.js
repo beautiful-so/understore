@@ -445,6 +445,7 @@
 				While(option.id);
 			}else{
 				delete option.cache;
+				typeof option.created != "undefined" ? option.created(option) : "";
 				Await();
 			}
 		}else if(option.sync){
@@ -478,7 +479,6 @@
 
 	function Init(option){
 		typeof option.events != "undefined" ? events[option.id] = option.events : "";
-		typeof option.created != "undefined" ? option.created(option) : "";
 		typeof option.css != "undefined" ? SetStyle(option) : "";
 
 		typeof dom[option.id] == "undefined" ? dom[option.id] = {} : "";
@@ -489,7 +489,6 @@
 
 		if(len > 0 && option.sync){
 			option.data = [];
-			option.cache = true;
 			for(var i = 0; i < len; i++){
 				var idx = index[option.id][i];
 				var data = option.sync ? localStorage.getItem(option.id+"-!#"+[idx]) : sessionStorage.getItem(option.id+"-!#"+[idx]);
@@ -500,8 +499,6 @@
 					option.data.push(obj);
 				}
 			}
-		}else{
-			option.cache = option.sync ? true : false;
 		}
 		return AddItem(option);
 	}
@@ -522,6 +519,8 @@
 				if(typeof option.template == "undefined"){
 					option.template = options[option.id].template;
 					option.target = options[option.id].target;
+				}else{
+					option.cache = option.sync ? true : false;
 				}
 
 				if(!for_type){
