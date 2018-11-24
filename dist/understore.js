@@ -501,7 +501,7 @@
 				}
 			}
 		}else{
-			option.cache = false;
+			option.cache = option.sync ? true : false;
 		}
 		return AddItem(option);
 	}
