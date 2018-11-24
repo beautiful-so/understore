@@ -156,7 +156,7 @@ setItem은 컴포넌트의 **수정**에 사용됩니다.
 
 }
 
-**return** : type undefined
+**return** : undefined
 undefined
 
 
@@ -266,7 +266,7 @@ removeItem은 컴포넌트를  **삭제**의 할때 사용되며 해당 컴포�
 
 };
 
-**return** : type undefined
+**return** : undefined
 
 ```
 _.removeItem({ 
@@ -288,7 +288,7 @@ clear는 removeItem 확장 유틸리티로 컴포넌트를  **모두삭제**의 
 
 }
 
-**return** : type number
+**return** : number
 
 ```
 var item = _.clear({id: “example_component”});
