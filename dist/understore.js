@@ -478,20 +478,22 @@
 	}
 
 	function Init(option){
-		typeof option.events != "undefined" ? events[option.id] = option.events : "";
+		var id = option.id;
+		typeof option.events != "undefined" ? events[id] = option.events : "";
 		typeof option.css != "undefined" ? SetStyle(option) : "";
 
-		typeof dom[option.id] == "undefined" ? dom[option.id] = {} : "";
-		typeof index[option.id] == "undefined" ? index[option.id] = [] : "";
+		typeof dom[id] == "undefined" ? dom[id] = {} : "";
+		typeof index[id] == "undefined" ? index[id] = [] : "";
 
-		index[option.id] = option.sync ? JSON.parse("["+GetCookie(option.id)+"]") : index[option.id];
-		var len = index[option.id].length;
+		index[id] = option.sync ? JSON.parse("["+GetCookie(id)+"]") : index[id];
+		var len = index[id].length;
 
 		if(len > 0 && option.sync){
 			option.data = [];
 			for(var i = 0; i < len; i++){
-				var idx = index[option.id][i];
-				var data = option.sync ? localStorage.getItem(option.id+"-!#"+[idx]) : sessionStorage.getItem(option.id+"-!#"+[idx]);
+				var idx = index[id][i];
+				var key = id+"-!#"+idx;
+				var data = option.sync ? localStorage.getItem(key) : sessionStorage.getItem(key);
 				var obj = JSON.parse(data);
 
 				if(obj){
@@ -506,7 +508,7 @@
 	function AddItem(option){
 		var id = option.id;
 		if(typeof options[id] == "undefined"){
-			options[option.id] = option;
+			options[id] = option;
 		}
 
 		if(typeof option.data != "undefined"){
@@ -539,7 +541,7 @@
 		}
 	}
 
-		function SetItem(option){
+	function SetItem(option){
 		var id = option.id;
 		typeof option.idx == "undefined" ? option.idx = 0 : "";
 		typeof option.template == "undefined" ? option.template = options[id].template : "";
@@ -583,9 +585,10 @@
 
 		if(typeof _dom != "undefined"){
 			var idx = option.idx ? option.idx : 0;
+			var key =id+"-!#"+idx;
 			var len = Object.keys(_dom).length-1;
 			var sync = options[id].sync;
-			var d = sync ? localStorage.getItem(id+"-!#"+idx) : sessionStorage.getItem(id+"-!#"+idx);
+			var d = sync ? localStorage.getItem(key) : sessionStorage.getItem(key);
 				d = d ? JSON.parse(d) : null;
 
 			data = {data : d, element : _dom[idx].node, id : id, idx : idx};
@@ -645,6 +648,7 @@
 	}
 
 	function GetStyle(option){
+		var id = option.id;
 		var cssText = "";
 		var uid = Math.random().toString(36).substring(7);
 		var link = document.createElement("link");
@@ -654,7 +658,7 @@
 		link.type = "text/css";
 		link.onload = function(){
 			var $tyle = document.createElement('style');
-			$tyle.id = uid+option.id;
+			$tyle.id = uid+id;
 			var style = $dom.styleSheets[0];
 			document.head.appendChild($tyle);
 			$dom.getElementById(uid).outerHTML = "";
@@ -663,25 +667,26 @@
 				var cssRule = style.cssRules[i];
 
 				if(cssRule.style){
-					cssRule.cssText.indexOf(":root") === -1 ? cssText += option.id+" "+cssRule.cssText : cssText += cssRule.cssText.replace(/:root/gi, option.id);
+					cssRule.cssText.indexOf(":root") === -1 ? cssText += id+" "+cssRule.cssText : cssText += cssRule.cssText.replace(/:root/gi, id);
 				}else{
 					var rule = "";
 					for(var s = 0,len = cssRule.cssRules.length; s < len; s++){
-						cssRule.cssRules[s].cssText.indexOf(":root") === -1 ? rule += option.id+" "+cssRule.cssRules[s].cssText : rule += cssRule.cssRules[s].cssText.replace(/:root/gi, option.id);
+						cssRule.cssRules[s].cssText.indexOf(":root") === -1 ? rule += id+" "+cssRule.cssRules[s].cssText : rule += cssRule.cssRules[s].cssText.replace(/:root/gi, id);
 					}
 					cssText += "@media "+cssRule.media.mediaText + "{"+rule+"}";
 				}
 			}
 			$tyle.textContent = cssText;
-			localStorage.setItem("$tyle_"+option.id, option.css+"_$tyle"+cssText);
+			localStorage.setItem("$tyle_"+id, option.css+"_$tyle"+cssText);
 		};
 		$dom.head.appendChild(link);
 		return cssText;
 	}
 
 	function SetStyle(option){
-		if(typeof option.css != "undefined" && !document.getElementById("understore_style"+option.id)){
-			var cache = localStorage.getItem("$tyle_"+option.id);
+		var id = option.id;
+		if(typeof option.css != "undefined" && !document.getElementById("understore_style"+id)){
+			var cache = localStorage.getItem("$tyle_"+id);
 
 			if(cache){
 				cache = cache.split("_$tyle");
