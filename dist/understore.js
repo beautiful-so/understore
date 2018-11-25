@@ -504,8 +504,8 @@
 	}
 
 	function AddItem(option){
-		if(typeof options[option.id] == "undefined"){
-			document.createElement(option.id);
+		var id = option.id;
+		if(typeof options[id] == "undefined"){
 			options[option.id] = option;
 		}
 
@@ -515,36 +515,36 @@
 
 			if(option.data.length > 0){
 				var len = option.data.length-1;
-				var for_type = typeof $for[option.id] == "undefined";
+				var for_type = typeof $for[id] == "undefined";
 				if(typeof option.template == "undefined"){
-					option.template = options[option.id].template;
-					option.target = options[option.id].target;
+					option.template = options[id].template;
+					option.target = options[id].target;
 				}else{
 					option.cache = option.sync ? true : false;
 				}
 
 				if(!for_type){
-					index[option.id].length ? $for[option.id].len = Math.max.apply(null, index[option.id]) : "";
-					$ync ? $for[option.id].idx = $for[option.id].len : "";
+					index[id].length ? $for[id].len = Math.max.apply(null, index[id]) : "";
 				}
 
 				$for[option.id] = {
-					idx : (for_type ? 0 : $for[option.id].idx + 1),
-					len : (for_type ? len : $for[option.id].len + 1),
+					idx : (for_type ? 0 : $for[id].idx + 1),
+					len : (for_type ? len : $for[id].len + 1),
 					option : option,
 					type : typeof_array,
 					promise : undefined
 				};
-				return While(option.id);
+				return While(id);
 			}
 		}
 	}
 
-	function SetItem(option){
+		function SetItem(option){
+		var id = option.id;
 		typeof option.idx == "undefined" ? option.idx = 0 : "";
-		typeof option.template == "undefined" ? option.template = options[option.id].template : "";
+		typeof option.template == "undefined" ? option.template = options[id].template : "";
 		var key = getIdx(option, option.idx);
-		var sync = options[option.id].sync;
+		var sync = options[id].sync;
 		var newValue = option.data;
 		var oldValue = sync ? $tore.localStorage.getItem(key) : $tore.sessionStorage.getItem(key);
 
@@ -597,8 +597,11 @@
 	}
 
 	function RemoveItem(option, clear){
-		var v, sync = options[option.id].sync;
-			v = sync ? $tore.localStorage.removeItem(option.id+"-!#"+option.idx) : $tore.sessionStorage.removeItem(option.id+"-!#"+option.idx);
+		var id = option.id;
+		var idx = option.idx;
+		var key = id+"-!#"+idx;
+		var v, sync = options[id].sync;
+			v = sync ? $tore.localStorage.removeItem(key) : $tore.sessionStorage.removeItem(key);
 		!clear ? Await() : "";
 		return v;
 	}
