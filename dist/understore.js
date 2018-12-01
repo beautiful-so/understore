@@ -17,9 +17,9 @@
 		ifrm.setAttribute("src", "about:blank");
 		ifrm.id = "understore"+uid;
 
-		window.onfocus = function(e){$ync = true;};
-		window.onblur = function(e){$ync = false;};
-		window.onstorage = StorageChanged;
+		window.addEventListener("focus", function(e){$ync = true;});
+		window.addEventListener("blur", function(e){$ync = false;});
+		window.addEventListener("storage", StorageChanged);
 		document.head.appendChild(ifrm);
 		$dom = document.getElementById("understore"+uid).contentDocument;
 		$tore = document.getElementById("understore"+uid).contentWindow;
@@ -45,7 +45,10 @@
 				option ? RemoveItem(option) : "";
 			},
 			clear : function(option){
-				Clear(option);
+				var len = 0;
+				option = Async(option, "clear");
+				len = option ? Clear(option) : 0;
+				return len;
 			}
 		};
 
@@ -62,20 +65,42 @@
 	}
 
 	function Await(o){
-		!Await.tasks ? Await.tasks = [] : "";
-		var states, task, len = Await.tasks.length;
-		
+		var states, task;
+
 		if(o){
-			if(o.promise){
-				return true;
+			var idx = index[o.option.id];
+			if(typeof Await.promise == "undefined"){
+				!Await.tasks ? Await.tasks = [] : "";
+				if(typeof Await.tasks == "object"){
+					if(o.action == "init"){
+						states = typeof idx != "undefined" ? false : o;
+					}else{
+						states = o;
+					}
+				}else{
+					states = o;
+				}
 			}else{
-				o.promise = true;
+				if(o.promise){
+					states = o;
+				}else{
+					o.promise = true;
+					Await.tasks.push(o);
+					if(o.action == "init"){
+						states = o;
+					}else{
+						task = Await.tasks.shift();
 
-				states = !Await.promise ? task = Await.tasks.push(o) : false;
+						if(task){
+							understore[task.action](task);
+						}else{
+							states = o;
+							Await.promise = false;
+						}
+					}
+				}
 			}
-		}
-
-		if(!task){
+		}else{
 			task = Await.tasks.shift();
 
 			if(task){
@@ -84,6 +109,7 @@
 				Await.promise = false;
 			}
 		}
+
 		return states;
 	}
 
@@ -108,7 +134,7 @@
 		var add = function(line, js) {
 			var on = line.match(eRe);
 			var key = "";
-			var handler = "";
+			var handler = "";setTimeout(function(){},0);
 			if(on){
 				for(var i = 0, len = on.length-1; i <= len; i++){
 					var _on = on[i].split("=");
@@ -253,8 +279,6 @@
 						}else{
 							option.target.appendChild(element);
 						}
-
-						Await();
 					}
 				} 
 			}
@@ -303,7 +327,6 @@
 				}
 			}
 		}
-		Await();
 	}
 
 	function Diff(obj1, obj2, v) {
@@ -314,7 +337,6 @@
 
 	function StorageChanged(e){
 		if(e.oldValue != e.newValue){
-			Await.promise = true;
 			var newValue = typeof e.newValue != "undefined" && e.newValue != "" ? JSON.parse(e.newValue) : "";
 			var oldValue = typeof e.oldValue != "undefined" && e.oldValue != "" ? JSON.parse(e.oldValue) : "";
 
@@ -343,7 +365,6 @@
 						option.data = [newValue];
 						delete newValue.$tate;
 						Diff(newValue, oldValue, option);
-						Await();
 					}else if(!newValue){
 						option.type = "remove";
 						var _idx = index[id].indexOf(idx*1);
@@ -373,10 +394,11 @@
 						}
 
 						option.sync ? SetCookie(id, index[id]) : "";
-						Await();
 					}
 					ChangedItem(option);
 				}
+				Await.promise = true;
+				Await();
 			}
 		}
 	}
@@ -412,9 +434,6 @@
 				_data = JSON.stringify(data);
 				sync ? $tore.localStorage.setItem(key, _data) : $tore.sessionStorage.setItem(key, _data);
 
-				if(len == idx){
-					Await();
-				}
 				return {id : id , idx : idx};
 			}else{
 				var parent;
@@ -446,7 +465,6 @@
 			}else{
 				delete option.cache;
 				typeof option.created != "undefined" ? option.created(option) : "";
-				Await();
 			}
 		}else if(option.sync){
 			var len = index[option.id].length;
@@ -462,7 +480,6 @@
 				type : typeof_array,
 				promise : undefined
 			};
-			Await();
 		}		
 	}
 
@@ -584,7 +601,7 @@
 		var _dom = dom[id];
 
 		if(typeof _dom != "undefined"){
-			var idx = option.idx ? option.idx : 0;
+			var idx = option.idx;
 			var key =id+"-!#"+idx;
 			var len = Object.keys(_dom).length-1;
 			var sync = options[id].sync;
@@ -599,13 +616,12 @@
 		return data;
 	}
 
-	function RemoveItem(option, clear){
+	function RemoveItem(option){
 		var id = option.id;
 		var idx = option.idx;
 		var key = id+"-!#"+idx;
 		var v, sync = options[id].sync;
 			v = sync ? $tore.localStorage.removeItem(key) : $tore.sessionStorage.removeItem(key);
-		!clear ? Await() : "";
 		return v;
 	}
 
@@ -617,7 +633,7 @@
 		if(len){
 			var end = len-1;
 			for(var i = 0; i < len; i++){
-				end == i ? RemoveItem({id : id, idx : item[i]}, true) : RemoveItem({id : id, idx : item[i]}, false); 
+				understore.removeItem({id : id, idx : item[i]}); 
 			}
 		}
 
