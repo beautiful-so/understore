@@ -183,16 +183,18 @@
 		
 		function eventBind(event, element, option, _option, _value){
 			return function(event){
-				var o = GetItem(_option);
-				event.id  = _option.id;
-				event.idx = _option.idx;
-				event.element = element;
-				event.data = o.data;
-				if(_option.parent){
-					event.parent = GetItem(_option.parent);
-				}
-				Await.tasks = [];
-				option.events[_value](event);
+				try{
+					var o = GetItem(_option);
+					event.id  = _option.id;
+					event.idx = _option.idx;
+					event.element = element;
+					event.data = o.data;
+					if(_option.parent){
+						event.parent = GetItem(_option.parent);
+					}
+					Await.tasks = [];
+					option.events[_value](event);
+				}catch(err){}
 			};
 		}
 
