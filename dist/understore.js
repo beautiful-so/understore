@@ -346,60 +346,58 @@
 			var idx = key[1];
 			var option = new Object(options[id]);
 
-			if(option.sync){
-				if(typeof idx != "undefined"){
-					var state = newValue ? newValue.$tate : "";
-					option.idx = idx*1;
-					option.type = state.type;
+			if(typeof idx != "undefined"){
+				var state = newValue ? newValue.$tate : "";
+				option.idx = idx*1;
+				option.type = state.type;
 
-					if(state.type === "add"){
-						option.insert = state.insert;
-						option.cache = false;
-						option.body = Template(option.template, newValue, id, idx, state.parent);
-						state.parent ? newValue.parent = state.parent : "";
+				if(state.type === "add"){
+					option.insert = state.insert;
+					option.cache = false;
+					option.body = Template(option.template, newValue, id, idx, state.parent);
+					state.parent ? newValue.parent = state.parent : "";
 
-						Continue(option, newValue);
-					}else if(state.type === "set"){
-						newValue.id = id;
-						newValue.idx = idx;
-						option.data = [newValue];
-						delete newValue.$tate;
-						Diff(newValue, oldValue, option);
-					}else if(!newValue){
-						option.type = "remove";
-						var _idx = index[id].indexOf(idx*1);
-						option.data = [newValue];
+					Continue(option, newValue);
+				}else if(state.type === "set"){
+					newValue.id = id;
+					newValue.idx = idx;
+					option.data = [newValue];
+					delete newValue.$tate;
+					Diff(newValue, oldValue, option);
+				}else if(!newValue){
+					option.type = "remove";
+					var _idx = index[id].indexOf(idx*1);
+					option.data = [newValue];
 
-						for (var property in dom[id][idx]) {
-							if(dom[id][idx].hasOwnProperty(property)){
-								if(property != "property"){
-									if(property.indexOf("on") == 0){
-										for(var e in dom[id][idx][property].events){
-											var type = dom[id][idx][property].events.type;
-											var handle = dom[id][idx][property].events.handle;
-											dom[id][idx][property].events.element.removeEventListener(type, handle);
-										}
+					for (var property in dom[id][idx]) {
+						if(dom[id][idx].hasOwnProperty(property)){
+							if(property != "property"){
+								if(property.indexOf("on") == 0){
+									for(var e in dom[id][idx][property].events){
+										var type = dom[id][idx][property].events.type;
+										var handle = dom[id][idx][property].events.handle;
+										dom[id][idx][property].events.element.removeEventListener(type, handle);
 									}
 								}
 							}
 						}
-
-						dom[id][idx].node.parentNode.removeChild(dom[id][idx].node);
-						delete dom[id][idx];
-
-						index[id].splice(_idx, 1);
-
-						if(index[id].length == 0){
-							delete $for[id];
-						}
-
-						option.sync ? SetCookie(id, index[id]) : "";
 					}
-					ChangedItem(option);
+
+					dom[id][idx].node.parentNode.removeChild(dom[id][idx].node);
+					delete dom[id][idx];
+
+					index[id].splice(_idx, 1);
+
+					if(index[id].length == 0){
+						delete $for[id];
+					}
+
+					option.sync ? SetCookie(id, index[id]) : "";
 				}
-				Await.promise = true;
-				Await();
+				ChangedItem(option);
 			}
+			Await.promise = true;
+			Await();
 		}
 	}
 
