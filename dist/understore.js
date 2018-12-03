@@ -4,7 +4,7 @@
 	(global.understore = factory());
 }(this, (function () { 'use strict';
 	var understore = {};
-	var $tore, $ync = true;
+	var $tore;
 	var $dom, dom = {};
 	var options = {};
 	var events = {};
@@ -17,8 +17,6 @@
 		ifrm.setAttribute("src", "about:blank");
 		ifrm.id = "understore"+uid;
 
-		window.addEventListener("focus", function(e){$ync = true;});
-		window.addEventListener("blur", function(e){$ync = false;});
 		window.addEventListener("storage", StorageChanged);
 		document.head.appendChild(ifrm);
 		$dom = document.getElementById("understore"+uid).contentDocument;
@@ -348,7 +346,7 @@
 			var idx = key[1];
 			var option = new Object(options[id]);
 
-			if($ync || option.sync){
+			if(option.sync){
 				if(typeof idx != "undefined"){
 					var state = newValue ? newValue.$tate : "";
 					option.idx = idx*1;
@@ -460,7 +458,7 @@
 		!option.cache ? option.insert == "prepend" ? index[option.id].unshift(option.idx) : index[option.id].push(option.idx) : "";
 		!option.cache && option.sync ? SetCookie(option.id, index[option.id]) : "";
 
-		if(typeof $for[option.id] != "undefined" && $ync){
+		if(typeof $for[option.id] != "undefined"){
 			if($for[option.id].idx < $for[option.id].len){
 				$for[option.id].idx = $for[option.id].idx+1;
 				While(option.id);
