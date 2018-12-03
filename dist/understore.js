@@ -46,7 +46,6 @@
 				var len = 0;
 				option = Async(option, "clear");
 				len = option ? Clear(option) : 0;
-				return len;
 			}
 		};
 
@@ -178,18 +177,16 @@
 		
 		function eventBind(event, element, option, _option, _value){
 			return function(event){
-				try{
-					var o = GetItem(_option);
-					event.id  = _option.id;
-					event.idx = _option.idx;
-					event.element = element;
-					event.data = o.data;
-					if(_option.parent){
-						event.parent = GetItem(_option.parent);
-					}
-					Await.tasks = [];
-					option.events[_value](event);
-				}catch(err){}
+				var o = GetItem(_option);
+				event.id  = _option.id;
+				event.idx = _option.idx;
+				event.element = element;
+				event.data = o.data;
+				if(_option.parent){
+					event.parent = GetItem(_option.parent);
+				}
+				Await.tasks = [];
+				option.events[_value](event);
 			};
 		}
 
@@ -617,7 +614,7 @@
 		var key = id+"-!#"+idx;
 		var v, sync = options[id].sync;
 			v = sync ? $tore.localStorage.removeItem(key) : $tore.sessionStorage.removeItem(key);
-		return v;
+		return;
 	}
 
 	function Clear(option){
@@ -632,7 +629,7 @@
 			}
 		}
 
-		return len;
+		return;
 	}
 
 	function SetCookie(cname, cvalue, exdays) {

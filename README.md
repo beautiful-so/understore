@@ -48,12 +48,7 @@ addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 }
 
-**return** : {
-> id : {string},
-
-> idx : {number}
-
-}
+**return** : undefined
 
 &nbsp;
 
@@ -157,7 +152,7 @@ setItem은 컴포넌트의 **수정**에 사용됩니다.
 }
 
 **return** : undefined
-undefined
+
 
 
 
@@ -288,7 +283,7 @@ clear는 removeItem 확장 유틸리티로 컴포넌트를  **모두삭제**의 
 
 }
 
-**return** : number
+**return** : undefined
 
 ```
 var item = _.clear({id: “example_component”});
