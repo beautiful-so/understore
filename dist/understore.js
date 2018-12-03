@@ -84,16 +84,13 @@
 				}else{
 					o.promise = true;
 					Await.tasks.push(o);
-					if(o.action == "init"){
+					if(o){
 						states = o;
 					}else{
 						task = Await.tasks.shift();
 
 						if(task){
 							understore[task.action](task);
-						}else{
-							states = o;
-							Await.promise = false;
 						}
 					}
 				}
