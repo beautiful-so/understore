@@ -82,10 +82,10 @@
 					states = o;
 				}else{
 					o.promise = true;
-					Await.tasks.push(o);
 					if(o){
 						states = o;
 					}else{
+						Await.tasks.push(o);
 						task = Await.tasks.shift();
 
 						if(task){
