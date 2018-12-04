@@ -32,7 +32,8 @@
 			init : Init,
 			addItem : function(option){
 				option = Async(option, "init");
-				return option ? Init(option) : undefined;
+				var data = option ? Init(option) : undefined;
+				return data;
 			},
 			setItem : function(option){
 				option = Async(option, "setItem");
