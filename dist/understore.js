@@ -32,7 +32,7 @@
 			init : Init,
 			addItem : function(option){
 				option = Async(option, "init");
-				option ? Init(option) : "";
+				return option ? Init(option) : undefined;
 			},
 			setItem : function(option){
 				option = Async(option, "setItem");

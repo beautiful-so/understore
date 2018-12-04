@@ -48,7 +48,12 @@ addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
 
 }
 
-**return** : undefined
+**return** : {
+> id : {string},
+
+> idx : {number}
+
+}
 
 &nbsp;
 

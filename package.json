@@ -1,6 +1,6 @@
 {
   "name": "understore",
-  "version": "0.5.0-stable",
+  "version": "0.5.2",
   "description": "",
   "main": "understore.js",
   "scripts": {
