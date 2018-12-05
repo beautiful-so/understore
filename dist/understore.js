@@ -32,24 +32,23 @@
 			init : Init,
 			addItem : function(option){
 				option = Async(option, "init");
-				if(option){
-					return Init(option);
-				}
+				return option ? Init(option) : undefined;
 			},
 			setItem : function(option){
 				option = Async(option, "setItem");
-				option ? SetItem(option) : "";
+				option ? SetItem(option) : undefined;
 			},
 			removeItem : function(option){
 				option = Async(option, "removeItem");
-				option ? RemoveItem(option) : "";
+				option ? RemoveItem(option) : undefined;
 			},
 			clear : function(option){
-				var len = 0;
 				option = Async(option, "clear");
-				len = option ? Clear(option) : 0;
+				option ? Clear(option) : undefined;
 			}
 		};
+
+		Await.tasks = [];
 
 		mixin(window._, understore);
 	})();
@@ -67,42 +66,19 @@
 		var states, task;
 
 		if(o){
-			var idx = index[o.option.id];
-			if(typeof Await.promise == "undefined"){
-				!Await.tasks ? Await.tasks = [] : "";
-				if(typeof Await.tasks == "object"){
-					if(o.action == "init"){
-						states = typeof idx != "undefined" ? false : o;
-					}else{
-						states = o;
-					}
-				}else{
-					states = o;
-				}
+			if(o.option.promise){
+				states = o;
 			}else{
-				if(o.promise){
-					states = o;
-				}else{
-					o.promise = true;
-					if(o){
-						states = o;
-					}else{
-						Await.tasks.push(o);
-						task = Await.tasks.shift();
-
-						if(task){
-							understore[task.action](task);
-						}
-					}
-				}
+				o.option.promise = true;
+				Await.tasks.push(o);
+				states = o;
 			}
 		}else{
 			task = Await.tasks.shift();
 
 			if(task){
-				understore[task.action](task);
-			}else{
-				Await.promise = false;
+				var option = task.option;
+				understore[task.action](option);
 			}
 		}
 
@@ -110,7 +86,8 @@
 	}
 
 	function Async(option, action){
-		var states = Await({option: option, action:action, promise : option.promise});
+		option.promise = option.promise;
+		var states = Await({option: option, action:action});
 
 		if(typeof option.option != "undefined"){
 			var promise = option.option.promise;
@@ -392,7 +369,6 @@
 				}
 				ChangedItem(option);
 			}
-			Await.promise = true;
 			Await();
 		}
 	}
@@ -560,10 +536,13 @@
 		var sync = options[id].sync;
 		var newValue = option.data;
 		var oldValue = sync ? $tore.localStorage.getItem(key) : $tore.sessionStorage.getItem(key);
-
-		oldValue = JSON.parse(oldValue);
-		oldValue != null ? delete oldValue.$tate : "";
-		oldValue = JSON.stringify(oldValue);
+		
+		if(oldValue != "undefined"){
+			oldValue = JSON.parse(oldValue);
+			oldValue != null ? delete oldValue.$tate : "";
+			oldValue = JSON.stringify(oldValue);
+		}
+			
 		var _newValue = JSON.stringify(newValue);
 
 		if(oldValue != _newValue){
@@ -625,7 +604,6 @@
 		var len = item ? item.length : false;
 
 		if(len){
-			var end = len-1;
 			for(var i = 0; i < len; i++){
 				understore.removeItem({id : id, idx : item[i]}); 
 			}
