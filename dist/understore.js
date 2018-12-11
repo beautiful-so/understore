@@ -71,6 +71,7 @@
 			}else{
 				o.option.promise = true;
 				Await.tasks.push(o);
+				Await.promise ? Await.tasks.shift() : "";
 				states = o;
 			}
 		}else{
@@ -79,6 +80,8 @@
 			if(task){
 				var option = task.option;
 				understore[task.action](option);
+			}else{
+				Await.promise = false;
 			}
 		}
 
@@ -91,8 +94,8 @@
 
 		if(typeof option.option != "undefined"){
 			var promise = option.option.promise;
-			option = option.option;
-			option.promise = promise;
+				option = option.option;
+				option.promise = promise;
 		}else{
 			option = states ? option : states;
 		}
@@ -107,7 +110,7 @@
 		var add = function(line, js) {
 			var on = line.match(eRe);
 			var key = "";
-			var handler = "";setTimeout(function(){},0);
+			var handler = "";
 			if(on){
 				for(var i = 0, len = on.length-1; i <= len; i++){
 					var _on = on[i].split("=");
@@ -370,6 +373,7 @@
 				ChangedItem(option);
 			}
 			Await();
+			Await.promise = true;
 		}
 	}
 
