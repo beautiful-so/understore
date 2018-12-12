@@ -2,7 +2,7 @@
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
 	(global.understore = factory());
-}(this, (function () { 'use strict';
+}(this, (function () {
 	var understore = {};
 	var $tore;
 	var $dom, dom = {};
@@ -68,7 +68,6 @@
 			clearInterval(promise.then);
 			promise.tasks = 0;
 			delete promise.then;
-			setTimeout(Await);
 		}
 
 		promise.tasks = Await.tasks.length;
@@ -329,10 +328,12 @@
 			var id = key[0];
 			var idx = key[1];
 			var option = new Object(options[id]);
-			
-			promise.then = typeof promise.then == "undefined" ? setInterval(promise) : clearInterval(promise.then);
 
 			if(typeof idx != "undefined"){
+				if(promise.then){
+					clearInterval(promise.then)
+					Await();
+				}
 				var state = newValue ? newValue.$tate : "";
 				option.idx = idx*1;
 				option.type = state.type;
