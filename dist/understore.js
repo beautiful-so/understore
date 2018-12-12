@@ -331,7 +331,7 @@
 
 			if(typeof idx != "undefined"){
 				if(promise.then){
-					clearInterval(promise.then)
+					clearInterval(promise.then);
 					Await();
 				}
 				var state = newValue ? newValue.$tate : "";
