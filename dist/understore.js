@@ -49,6 +49,7 @@
 		};
 
 		Await.tasks = [];
+		promise.tasks = 0;
 
 		mixin(window._, understore);
 	})();
@@ -62,30 +63,39 @@
 		return receiver;
 	}
 
-	function Await(o){
-		var states, task;
+	function promise(){
+		if(promise.tasks == Await.tasks.length){
+			clearInterval(promise.then);
+			promise.tasks = 0;
+			delete promise.then;
+			delete promise.pending;
+			setTimeout(Await);
+		}
 
+		promise.tasks = Await.tasks.length;
+	}
+
+	function Await(o){
 		if(o){
-			if(o.option.promise){
-				states = o;
-			}else{
+			if(!o.option.promise){
 				o.option.promise = true;
-				Await.tasks.push(o);
-				Await.promise ? Await.tasks.shift() : "";
-				states = o;
+				if(typeof promise.then != "undefined"){
+					Await.tasks.push(o);
+				}else{
+					promise.then = setInterval(promise,10);
+				}
 			}
 		}else{
-			task = Await.tasks.shift();
+			promise.pending = true;
+			var task = Await.tasks.shift();
 
 			if(task){
 				var option = task.option;
 				understore[task.action](option);
-			}else{
-				Await.promise = false;
 			}
 		}
 
-		return states;
+		return o;
 	}
 
 	function Async(option, action){
@@ -371,9 +381,8 @@
 					option.sync ? SetCookie(id, index[id]) : "";
 				}
 				ChangedItem(option);
+				promise.pending ? setTimeout(Await) : "";
 			}
-			Await();
-			Await.promise = true;
 		}
 	}
 
