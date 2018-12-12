@@ -381,7 +381,6 @@
 					option.sync ? SetCookie(id, index[id]) : "";
 				}
 				ChangedItem(option);
-				Await();
 			}
 		}
 	}
