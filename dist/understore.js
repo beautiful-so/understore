@@ -68,7 +68,6 @@
 			clearInterval(promise.then);
 			promise.tasks = 0;
 			delete promise.then;
-			delete promise.pending;
 			setTimeout(Await);
 		}
 
@@ -81,12 +80,11 @@
 				o.option.promise = true;
 				if(typeof promise.then != "undefined"){
 					Await.tasks.push(o);
-				}else{
-					promise.then = setInterval(promise,10);
+				}else if(typeof promise.then == "undefined"){
+					promise.then = setInterval(promise);
 				}
 			}
 		}else{
-			promise.pending = true;
 			var task = Await.tasks.shift();
 
 			if(task){
@@ -331,6 +329,8 @@
 			var id = key[0];
 			var idx = key[1];
 			var option = new Object(options[id]);
+			
+			promise.then = typeof promise.then == "undefined" ? setInterval(promise) : clearInterval(promise.then);
 
 			if(typeof idx != "undefined"){
 				var state = newValue ? newValue.$tate : "";
@@ -381,7 +381,7 @@
 					option.sync ? SetCookie(id, index[id]) : "";
 				}
 				ChangedItem(option);
-				promise.pending ? setTimeout(Await) : "";
+				Await();
 			}
 		}
 	}
