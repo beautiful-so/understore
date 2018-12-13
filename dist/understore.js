@@ -331,7 +331,6 @@
 
 			if(typeof idx != "undefined"){
 				if(promise.then){
-					clearInterval(promise.then);
 					Await();
 				}
 				var state = newValue ? newValue.$tate : "";
@@ -454,22 +453,18 @@
 			var for_type = typeof $for[option.id] == "undefined";
 			var typeof_array = typeof option.data == "undefined";
 
-			!for_type && index[option.id].length ? $for[option.id].len = Math.max.apply(null, index[option.id]) : "";
-			!for_type && index[option.id].length ? $for[option.id].id = Math.max.apply(null, index[option.id]) : "";
 			$for[option.id] = {
 				idx : (for_type ? 0 : $for[option.id].idx + 1),
 				len : (for_type ? len : $for[option.id].len + 1),
 				option : option,
-				type : typeof_array,
-				promise : undefined
+				type : typeof_array
 			};
 		}		
 	}
 
 	function getIdx(option, idx){
 		var id = option.id;
-		var len = typeof dom[id] != "undefined" ? Object.keys(dom[id]).length : 0;
-		var key = id + "-!#" + (typeof idx != "undefined" ? idx : len);
+		var key = id + "-!#" + idx;
 		return key;
 	}
 
@@ -479,6 +474,8 @@
 
 	function Init(option){
 		var id = option.id;
+
+		typeof options[id] == "undefined" ? options[id] = option : "";
 		typeof option.events != "undefined" ? events[id] = option.events : "";
 		typeof option.css != "undefined" ? SetStyle(option) : "";
 
@@ -507,9 +504,6 @@
 
 	function AddItem(option){
 		var id = option.id;
-		if(typeof options[id] == "undefined"){
-			options[id] = option;
-		}
 
 		if(typeof option.data != "undefined"){
 			var typeof_array = typeof option.data.length == "undefined";
@@ -525,16 +519,11 @@
 					option.cache = option.sync ? true : false;
 				}
 
-				if(!for_type){
-					index[id].length ? $for[id].len = Math.max.apply(null, index[id]) : "";
-				}
-
 				$for[option.id] = {
 					idx : (for_type ? 0 : $for[id].idx + 1),
 					len : (for_type ? len : $for[id].len + 1),
 					option : option,
-					type : typeof_array,
-					promise : undefined
+					type : typeof_array
 				};
 				return While(id);
 			}
