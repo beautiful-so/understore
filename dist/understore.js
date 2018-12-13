@@ -330,9 +330,6 @@
 			var option = new Object(options[id]);
 
 			if(typeof idx != "undefined"){
-				if(promise.then){
-					Await();
-				}
 				var state = newValue ? newValue.$tate : "";
 				option.idx = idx*1;
 				option.type = state.type;
@@ -381,6 +378,9 @@
 					option.sync ? SetCookie(id, index[id]) : "";
 				}
 				ChangedItem(option);
+			}
+			if(promise.then){
+				Await();
 			}
 		}
 	}
