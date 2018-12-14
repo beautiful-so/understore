@@ -387,18 +387,17 @@
 
 	function While(id){
 		var len = $for[id].len;
-		var option = $for[id].option;
 		var idx = $for[id].idx;
-		var sync = options[id].sync;
+		var option = $for[id].option;
 
-		if(typeof dom[option.id] != "undefined" && !option.cache){
-			option.idx = Object.keys(dom[id]).length;
-		}else if(typeof index[option.id] != "undefined"){
-			typeof index[option.id][idx] != "undefined" ? option.idx = index[option.id][idx]*1 : option.idx = idx;
+		if(option.cache){
+			option.idx = index[id].length ? index[id][idx] : idx;
 		}else{
-			option.idx = idx;
+			option.idx = index[id].length ? Math.max.apply(null, index[id])+1 : idx;
 		}
-		var key = getIdx(option, idx);
+
+		var sync = options[id].sync;
+		var key = getIdx(option, option.idx);
 		var data = option.data[($for[id].type ? 0 : idx)];
 
 		if(data){
@@ -431,7 +430,7 @@
 				option.parent = parent;
 				Continue(option, data);
 			}
-		}		
+		}
 	}
 
 	function Continue(option, data){
@@ -516,7 +515,7 @@
 					option.template = options[id].template;
 					option.target = options[id].target;
 				}else{
-					option.cache = option.sync ? true : false;
+					option.cache = option.sync ? true : false;	
 				}
 
 				$for[option.id] = {
@@ -525,6 +524,7 @@
 					option : option,
 					type : typeof_array
 				};
+
 				return While(id);
 			}
 		}
