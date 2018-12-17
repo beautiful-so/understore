@@ -5,9 +5,10 @@
 
 >SNS 알림, 메일 알림등	탭간 다르게 보여지는 각 상태를 **새로고침 없이 동기화**를 가능하게 합니다.
 
-**ajax 요청 구현시 유지보수 및 코드의 향상성을 떨어뜨리는 콜백 패턴이 아닌 **
+**ajax 요청 구현시 유지보수 및 코드의 향상성을 떨어뜨리는 콜백 패턴이 아닌**
 
-**[Promise](https://caniuse.com/#feat=async-functions) 패턴의 체이닝 메서드 구현을 통해 유지보수 및 코드의 향상성 관리가 가능합니다. **
+**[Promise](https://caniuse.com/#feat=async-functions) 패턴의 체이닝 메서드 구현을 통해 유지보수 및 코드의 향상성 관리가 가능합니다.**
+
 > chrome, safari, firefox, Internet Explorer9 more than / cross browsing support
 
 >자세한 내용은 아래 API 문서와 예제를 참조해주세요
@@ -18,7 +19,7 @@
 
 ### _.addItem
 
-addItem은 컴포넌트의 **생성**과 **추가**에 사용됩니다.
+addItem은 컴포넌트의 **생성**과 **추가**에 사용되는 메서드입니다.
 
 
 **parameter** : {
@@ -144,7 +145,7 @@ _.addItem({
 
 ## _.setItem
 
-setItem은 컴포넌트의 **수정**에 사용됩니다.
+setItem은 컴포넌트의 **수정**에 사용되는 메서드입니다.
 
 **parameter** : {
 >id: {string},
@@ -176,7 +177,7 @@ _.setItem({
 
 ## _.getItem
 
-getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 확장 컴포넌트**의 값을 가져오는데 사용됩니다.
+getItem은 컴포넌트  **이벤트, 컴포넌트, 데이터, 확장 컴포넌트**의 값을 가져오는데 사용되는 메서드입니다.
 
 **parameter** : {
 
@@ -215,7 +216,7 @@ console.log(item);
 
 ## _.getItems
 
-getItems은 컴포넌트  **getItem**의 확장 유틸리티로 컴포넌트의 정보를 배열 값으로 모두 가져오는데 사용됩니다.
+getItems은 **getItem**의 확장 유틸리티 메서드로 컴포넌트의 정보를 배열 값으로 모두 가져오는데 사용됩니다.
 
 **parameter** : {
 
@@ -260,7 +261,7 @@ console.log(item);
 &nbsp;
 ## _.removeItem
 
-removeItem은 컴포넌트를  **삭제**의 할때 사용되며 해당 컴포넌트, 바인딩된 이벤트, 데이터를 한번에 삭제합니다.
+removeItem은 컴포넌트를  **삭제**의 할때 사용되며 해당 컴포넌트, 바인딩된 이벤트, 데이터를 한번에 삭제하는 메서드입니다,
 
 **parameter** : { 
 >id : "example_component", 
@@ -286,7 +287,7 @@ _.removeItem({
 
 ## _.clear
 
-clear는 removeItem 확장 유틸리티로 컴포넌트를  **모두삭제**의 할때 사용되며 모든 컴포넌트, 바인딩된 이벤트, 데이터를 한번에 삭제합니다.
+clear는 removeItem 확장 유틸리티 메서드이며 컴포넌트를  **모두삭제**의 할때 사용되며 모든 컴포넌트, 바인딩된 이벤트, 데이터를 한번에 삭제합니다.
 
 **parameter** : {
 > id : {string}
@@ -309,7 +310,7 @@ console.log(item);
 
 ## _.fetch
 
-promise 패턴 기반의 요청 메소드이며 요청&관리를 위한 확장 유틸리티를 제공합니다.
+promise 패턴 기반의 요청 메소드이며 요청&관리를 위한 확장 유틸리티 메서드를 제공합니다.
 
 > **then** (체인 메서드)
 
@@ -345,20 +346,18 @@ callback hell 패턴이 아닌 체이닝 메서드 형식으로 코드의 가독
 
 ```
 // example01.json
-// {
-//	data : {
-//		name : "understore"
-//  }
-// }
-//
+{
+	data : {
+		name : "understore"
+	}
+}
 
 // example02.json
-// {
-//	data : {
-//		value : "library"
-//  }
-// }
-//
+{
+	data : {
+		value : "library"
+	}
+}
 ```
 
 ```
