@@ -29,6 +29,8 @@
 			setCookie : SetCookie,
 			getItem : GetItem,
 			getItems : GetItems,
+			fetch : Fetch,
+			abort : Abort,
 			init : Init,
 			addItem : function(option){
 				option = Async(option, "init");
@@ -48,8 +50,11 @@
 			}
 		};
 
-		Await.tasks = [];
 		promise.tasks = 0;
+		Idle.milliseconds = 0;
+		Idle.duration = 10;
+		Idle.tasks = [];
+		Await.tasks = [];
 
 		mixin(window._, understore);
 	})();
@@ -62,12 +67,130 @@
 		}
 		return receiver;
 	}
+	
+	function Request(url, obj){
+		Fetch.request = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+		Request.timeout = obj.timeout ? setTimeout(Abort, obj.timeout) : false;
+		if(obj.cache){
+			var _url = url.indexOf("?") > -1 ? "&" : "?";
+			url += _url+Math.random().toString(36).substring(7);
+		}
+		Fetch.request.onreadystatechange = function (e) {
+			try{
+				if (e.target.readyState == 4) {
+					clearTimeout(Request.timeout);
+					delete Request.timeout;
+
+					var res = {
+						status : e.target.status,
+						body : {}
+					};
+
+					try{
+						res.body = JSON.parse(e.target.responseText);
+					}catch(err){
+						res.body = "";
+						res.body = e.target.responseText;
+					}
+					setTimeout(function(){
+						delete Fetch.req;
+						Chain(res);
+					}, Idle.duration);
+				}
+			}catch(err){
+				clearInterval(Idle.task);
+				delete Fetch.req;
+				Chain(res);
+				console.log(err);
+			}
+		};
+		Fetch.request.open(obj.method, url, true);
+		if(obj.headers){
+			for (var header in obj.headers) {
+				if(obj.headers.hasOwnProperty(header)){
+					Fetch.request.setRequestHeader(header, obj.headers[header]);
+				}
+			}
+		}
+		obj.body ? Fetch.request.send(obj.body) : Fetch.request.send();	
+	}
+
+	function Abort(){
+		if(typeof Fetch.request == "object"){
+			Fetch.request.abort();
+			delete Fetch.request;
+			Idle.milliseconds = 0;
+			Idle.tasks.splice(0,Idle.tasks.length);
+		}
+	}
+
+	function Fetch(url, obj){
+		if(typeof url == "string"){
+			if(typeof obj == "undefined"){
+				obj = {
+					method : "GET"
+				};
+			}else{
+				obj.method = typeof obj.method == "undefined" ? "GET" : obj.method;
+			}
+
+			Idle.tasks.push([url, obj]);
+
+			if (Idle.tasks.length == 1)
+				Idle.task = setInterval(Idle, Idle.duration);
+
+			return {
+				then : Then,
+				fetch : Fetch
+			};
+		}else{
+			clearInterval(Idle.task);
+		}
+	}
+
+	function Idle(){
+		Idle.milliseconds += 0.1;
+		if(Idle.milliseconds > 1){
+			Chain();
+			clearInterval(Idle.task);
+		}
+	}
+	
+	function Chain(res){
+		if(Idle.tasks.length > 0){
+			var task = Idle.tasks.shift();
+			if(typeof task == "object"){
+				Request(task[0], task[1]);
+			}else if(typeof task == "function"){
+				typeof res != "undefined" ? task(res) : task();
+
+				if(Idle.tasks.length > 0){
+					Idle.milliseconds = 0;
+					setTimeout(Chain, Idle.duration);
+				}
+			}
+		}
+	}
+
+	function Then(task){
+		Idle.milliseconds = 0;
+		if(typeof task == "function"){
+			Idle.tasks.push(task);
+			return {
+				then : Then,
+				fetch : Fetch
+			};
+		}else{
+			clearInterval(Idle.task);
+		}
+		
+	}
 
 	function promise(){
 		if(promise.tasks == Await.tasks.length){
-			clearInterval(promise.then);
+			clearInterval(promise.task);
 			promise.tasks = 0;
-			delete promise.then;
+			delete promise.task;
 		}
 
 		promise.tasks = Await.tasks.length;
@@ -77,10 +200,10 @@
 		if(o){
 			if(!o.option.promise){
 				o.option.promise = true;
-				if(typeof promise.then != "undefined"){
+				if(typeof promise.task != "undefined"){
 					Await.tasks.push(o);
-				}else if(typeof promise.then == "undefined"){
-					promise.then = setInterval(promise);
+				}else if(typeof promise.task == "undefined"){
+					promise.task = setInterval(promise);
 				}
 			}
 		}else{
@@ -379,7 +502,7 @@
 				}
 				ChangedItem(option);
 			}
-			if(promise.then){
+			if(promise.task){
 				Await();
 			}
 		}
