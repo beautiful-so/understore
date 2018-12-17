@@ -310,11 +310,7 @@ console.log(item);
 
 ## _.fetch
 
-promise 패턴 기반의 요청 메소드이며 요청&관리를 위한 확장 유틸리티 메서드를 제공합니다.
-
-> **then** (체인 메서드)
-
-> **abort** (요청취소 메서드)
+promise 패턴 기반의 ajax 요청 메소드입니다.
 
 **parameter** : 
 
@@ -339,12 +335,17 @@ url : {string},
 
 }
 
-callback hell 패턴이 아닌 체이닝 메서드 형식으로 코드의 가독성 관리가 가능하며
+체인 메서드를 위한 확장 유틸리티 **then** 메서드를 추가 제공하며.
+> callback hell 패턴이 아닌 체이닝 메서드 형식으로 코드의 가독성 관리가 가능하며
 
-아래 예제와 같이 요청도 체이닝이 가능합니다.
+> 사용방법은 아래 "fetch & then example" 예제를 참고
+
+요청취소를 위한 **abort** 메서드를 추가 제공합니다.
+> _.abort(); // 호출시 기존에 요청한 체이닝 메서드 요청을 block하고 제거합니다.
 
 
 ```
+// fetch & then example
 // example01.json
 {
 	data : {
