@@ -1,3 +1,6 @@
+**5가지 함수로 확장가능한 웹 컴포넌트 개발**
+
+
 **[추가, 가져오기, 모두가져오기, 삭제, 모두삭제]** 5개의 API를 활용한 개발은
 
 확장 컴포넌트간의 상태관리 및 유지보수의 용이성을 제공합니다.
@@ -168,7 +171,9 @@ _.setItem({
 	id : "example_component", 
 	data : {text : "텍스트를 수정"} 
 });
+```
 
+```
 => undefined
 ```
 &nbsp;
@@ -204,9 +209,10 @@ var item = _.getItem({
 });
   
 console.log(item);
+```
+
+```
 => { Event object......, data : addItem add data!, elment : ▶<example_component>...</example_component>  }
-
-
 ```
 
 &nbsp;
@@ -249,9 +255,10 @@ var item = _.getItems({
 });
   
 console.log(item);
+```
+
+```
 => [Array Extend event object]
-
-
 ```
 
 &nbsp;
@@ -273,7 +280,9 @@ _.removeItem({
 	id : "example_component", 
 	idx : 2
 });
+```
 
+```
 => undefined
 ```
 
@@ -294,7 +303,104 @@ clear는 removeItem 확장 유틸리티로 컴포넌트를  **모두삭제**의 
 var item = _.clear({id: “example_component”});
 
 console.log(item);
+```
+
+```
 => 17  // example_component items removed length
+```
+&nbsp;
+
+
+## _.fetch
+
+promise 패턴 기반의 요청 메소드이며 요청&관리를 위한 확장 유틸리티를 제공합니다.
+
+> **then** (체인 메서드)
+
+> **abort** (요청취소 메서드)
+
+**parameter** : 
+
+url : {string},
+
+{
+
+> method : {string},
+
+> headers : {object},
+
+> cache : {boolean},
+
+> timeout : {number}
+
+}
+
+**return** : {
+> status : {number},
+
+> body : {JSON or string}
+
+}
+
+callback hell 패턴이 아닌 체이닝 메서드 형식으로 코드의 가독성 관리가 가능하며
+
+아래 예제와 같이 요청도 체이닝이 가능합니다.
+
+
+```
+// example01.json
+// {
+//	data : {
+//		name : "understore"
+//  }
+// }
+//
+
+// example02.json
+// {
+//	data : {
+//		value : "library"
+//  }
+// }
+//
+```
+
+```
+_.fetch("example01.json", {
+    // method : "GET", default method value "GET"
+	cache: true,
+	// headers :{"Accept": "text/json","goooood": "understore"} <- example case
+}).then(function(res){
+    this.v = res.data.name;
+}).then(function(){
+    console.log("example01 ajax : ", res);
+})
+.fetch("example02.json", {
+    method : "GET",
+	cache: true,
+	headers :{"Accept": "text/text","goooood": 11111}
+}).then(function(res){
+    console.log("example02 ajax : ", res);
+    this.v = this.v + " " + res.data.name;
+}).then(function(){
+    console.log(this.v);
+})console.log(item);
+```
+
+```
+=> "example01 ajax : ", {
+	data : {
+		name : "understore"
+	}
+}
+
+=> "example02 ajax : ", {
+	data : {
+		name : "web component library"
+	}
+}
+
+=> "understore web component library"
 ```
 &nbsp;
 
