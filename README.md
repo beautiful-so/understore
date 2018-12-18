@@ -398,6 +398,37 @@ _.fetch("example01.json", {
 
 => "understore web component library"
 ```
+
+&nbsp;
+
+## _.then
+
+promise 패턴 기반의 체인 메소드입니다.
+
+**parameter** : {function}
+
+**return** : undefined
+```
+_.then(function(){
+	this.v = 0;
+	for(var i = 0, len = 5; i < len; i++){
+		this.v += i;	
+	}
+}).then(function(){
+    console.log("count v : ", this.v);
+}).then(function(){
+    for(var i = 0, len = 5; i < len; i++){
+		this.v -= i;	
+	}
+}).then(function(){
+    console.log("count v : ", this.v);
+})
+```
+
+```
+=> count v :  10
+=> count v :  0
+```
 &nbsp;
 
 
