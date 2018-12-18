@@ -30,6 +30,7 @@
 			getItem : GetItem,
 			getItems : GetItems,
 			fetch : Fetch,
+			then : Then,
 			abort : Abort,
 			init : Init,
 			addItem : function(option){
@@ -176,6 +177,8 @@
 		Idle.milliseconds = 0;
 		if(typeof task == "function"){
 			Idle.tasks.push(task);
+			if (Idle.tasks.length == 1)
+				Idle.task = setInterval(Idle, Idle.duration);
 			return {
 				then : Then,
 				fetch : Fetch
