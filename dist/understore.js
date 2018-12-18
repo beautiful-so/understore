@@ -31,6 +31,7 @@
 			getItems : GetItems,
 			fetch : Fetch,
 			then : Then,
+			catch : Catch,
 			abort : Abort,
 			init : Init,
 			addItem : function(option){
@@ -56,6 +57,7 @@
 		Idle.duration = 10;
 		Idle.tasks = [];
 		Await.tasks = [];
+		Catch.error = [];
 
 		mixin(window._, understore);
 	})();
@@ -126,25 +128,33 @@
 	}
 
 	function Fetch(url, obj){
-		if(typeof url == "string"){
-			if(typeof obj == "undefined"){
-				obj = {
-					method : "GET"
+		try{
+			if(typeof url == "string"){
+				if(typeof obj == "undefined"){
+					obj = {
+						method : "GET"
+					};
+				}else{
+					obj.method = typeof obj.method == "undefined" ? "GET" : obj.method;
+				}
+				var _task = [url, obj];
+				_task.key = "fetch";
+
+				Idle.tasks.push(_task);
+
+				if (Idle.tasks.length == 1)
+					Idle.task = setInterval(Idle, Idle.duration);
+
+				return {
+					then : Then,
+					fetch : Fetch,
+					catch : Catch
 				};
 			}else{
-				obj.method = typeof obj.method == "undefined" ? "GET" : obj.method;
+				clearInterval(Idle.task);
 			}
-
-			Idle.tasks.push([url, obj]);
-
-			if (Idle.tasks.length == 1)
-				Idle.task = setInterval(Idle, Idle.duration);
-
-			return {
-				then : Then,
-				fetch : Fetch
-			};
-		}else{
+		}catch(err){
+			console.log(err);
 			clearInterval(Idle.task);
 		}
 	}
@@ -158,35 +168,88 @@
 	}
 	
 	function Chain(res){
-		if(Idle.tasks.length > 0){
-			var task = Idle.tasks.shift();
-			if(typeof task == "object"){
-				Request(task[0], task[1]);
-			}else if(typeof task == "function"){
-				typeof res != "undefined" ? task(res) : task();
+		try{
+			if(Idle.tasks.length > 0){
+				var task = Idle.tasks.shift();
+				var key = task.key;
 
-				if(Idle.tasks.length > 0){
-					Idle.milliseconds = 0;
-					setTimeout(Chain, Idle.duration);
+				if(key == "fetch"){
+					Request(task[0], task[1]);
+				}else if(key == "catch"){
+					if(Catch.error.length){
+						task(Catch.error);
+						Catch.error.splice(0, Catch.error.length);
+					}
+					if(Idle.tasks.length > 0){
+						Idle.milliseconds = 0;
+						setTimeout(Chain, Idle.duration);
+					}
+				}else if(key == "then"){
+					typeof res != "undefined" ? task(res) : task();
+
+					if(Idle.tasks.length > 0){
+						Idle.milliseconds = 0;
+						setTimeout(Chain, Idle.duration);
+					}
+				}else{
+					clearInterval(promise.task);
+					promise.tasks = 0;
+					delete promise.task;
+					Catch.error.splice(0, Catch.error.length);
 				}
 			}
+		}catch(err){
+			Catch.error.push(err);
+			if(Idle.tasks.length > 0){
+				setTimeout(Chain, Idle.duration);
+			}else{
+				clearInterval(Idle.task);
+			}
+		}
+	}
+	
+	function Catch(task){
+		Idle.milliseconds = 0;
+		try{
+			if(typeof task == "function"){
+				task.key = "catch";
+				Idle.tasks.push(task);
+				if (Idle.tasks.length == 1)
+					Idle.task = setInterval(Idle, Idle.duration);
+				return {
+					then : Then,
+					fetch : Fetch,
+					catch : Catch 
+				};
+			}else{
+				clearInterval(Idle.task);
+			}
+		}catch(err){
+			console.log(err);
+			clearInterval(Idle.task);
 		}
 	}
 
 	function Then(task){
 		Idle.milliseconds = 0;
-		if(typeof task == "function"){
-			Idle.tasks.push(task);
-			if (Idle.tasks.length == 1)
-				Idle.task = setInterval(Idle, Idle.duration);
-			return {
-				then : Then,
-				fetch : Fetch
-			};
-		}else{
+		try{
+			if(typeof task == "function"){
+				task.key = "then";
+				Idle.tasks.push(task);
+				if (Idle.tasks.length == 1)
+					Idle.task = setInterval(Idle, Idle.duration);
+				return {
+					then : Then,
+					fetch : Fetch,
+					catch : Catch 
+				};
+			}else{
+				clearInterval(Idle.task);
+			}
+		}catch(err){
+			console.log(err);
 			clearInterval(Idle.task);
 		}
-		
 	}
 
 	function promise(){
