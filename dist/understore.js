@@ -72,6 +72,8 @@
 	}
 	
 	function Request(url, obj){
+		clearInterval(Idle.task);
+		Idle.milliseconds = 0;
 		Fetch.request = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
 		Request.timeout = obj.timeout ? setTimeout(Abort, obj.timeout) : false;
 		if(obj.cache){
@@ -95,14 +97,14 @@
 						res.body = "";
 						res.body = e.target.responseText;
 					}
-					setTimeout(function(){
-						delete Fetch.req;
-						Chain(res);
-					}, Idle.duration);
+
+					delete Fetch.request;
+					Idle.milliseconds = 1;
+					Chain(res);
 				}
 			}catch(err){
 				clearInterval(Idle.task);
-				delete Fetch.req;
+				delete Fetch.request;
 				Chain(res);
 				console.log(err);
 			}
@@ -142,8 +144,8 @@
 
 				Idle.tasks.push(_task);
 
-				if (Idle.tasks.length == 1)
-					Idle.task = setInterval(Idle, Idle.duration);
+				if (Idle.tasks.length)
+					Idle.task = !Idle.task ? setInterval(Idle, Idle.duration) : undefined;
 
 				return {
 					then : Then,
@@ -172,6 +174,7 @@
 			if(Idle.tasks.length > 0){
 				var task = Idle.tasks.shift();
 				var key = task.key;
+				Idle.milliseconds = 0;
 
 				if(key == "fetch"){
 					Request(task[0], task[1]);
@@ -181,14 +184,12 @@
 						Catch.error.splice(0, Catch.error.length);
 					}
 					if(Idle.tasks.length > 0){
-						Idle.milliseconds = 0;
 						setTimeout(Chain, Idle.duration);
 					}
 				}else if(key == "then"){
 					typeof res != "undefined" ? task(res) : task();
 
 					if(Idle.tasks.length > 0){
-						Idle.milliseconds = 0;
 						setTimeout(Chain, Idle.duration);
 					}
 				}else{
@@ -197,6 +198,8 @@
 					delete promise.task;
 					Catch.error.splice(0, Catch.error.length);
 				}
+			}else{
+				clearInterval(Idle.task);
 			}
 		}catch(err){
 			Catch.error.push(err);
@@ -215,7 +218,7 @@
 				task.key = "catch";
 				Idle.tasks.push(task);
 				if (Idle.tasks.length == 1)
-					Idle.task = setInterval(Idle, Idle.duration);
+					Idle.task = !Idle.task ? setInterval(Idle, Idle.duration) : undefined;
 				return {
 					then : Then,
 					fetch : Fetch,
@@ -237,7 +240,8 @@
 				task.key = "then";
 				Idle.tasks.push(task);
 				if (Idle.tasks.length == 1)
-					Idle.task = setInterval(Idle, Idle.duration);
+					Idle.task = !Idle.task ? setInterval(Idle, Idle.duration) : undefined;
+
 				return {
 					then : Then,
 					fetch : Fetch,
