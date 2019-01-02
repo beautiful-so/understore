@@ -257,13 +257,15 @@
 	}
 
 	function promise(){
-		if(promise.tasks == Await.tasks.length){
+		if(Await.tasks.length == promise.tasks){
 			clearInterval(promise.task);
 			promise.tasks = 0;
 			delete promise.task;
+		}else{
+			Await();
 		}
 
-		promise.tasks = Await.tasks.length;
+		promise.tasks == Await.tasks.length;
 	}
 
 	function Await(o){
@@ -272,6 +274,7 @@
 				o.option.promise = true;
 				if(typeof promise.task != "undefined"){
 					Await.tasks.push(o);
+					return false;
 				}else if(typeof promise.task == "undefined"){
 					promise.task = setInterval(promise);
 				}
@@ -282,6 +285,8 @@
 			if(task){
 				var option = task.option;
 				understore[task.action](option);
+			}else{
+				Await.tasks.length = 0;
 			}
 		}
 
@@ -289,7 +294,6 @@
 	}
 
 	function Async(option, action){
-		option.promise = option.promise;
 		var states = Await({option: option, action:action});
 
 		if(typeof option.option != "undefined"){
@@ -353,22 +357,51 @@
 		var _dom = dom[option.id][option.idx.toString()] = {};
 		var element = document.createElement("div");
 			element.innerHTML = option.body;
-
 		var tagName = element.childNodes[0].nodeName.toLowerCase();
 			element = element.querySelector(tagName);
-		
+
 		function eventBind(event, element, option, _option, _value){
 			return function(event){
-				var o = GetItem(_option);
-				event.id  = _option.id;
-				event.idx = _option.idx;
-				event.element = element;
-				event.data = o.data;
-				if(_option.parent){
-					event.parent = GetItem(_option.parent);
+				if(Idle.tasks.length == 0){
+					var id = event.id  = _option.id;
+					var idx= event.idx = _option.idx;
+					var __dom = dom[id][idx];
+
+					var o = GetItem(_option);
+					event.element = element;
+					event.data = o.data;
+					if(_option.parent){
+						event.parent = GetItem(_option.parent);
+					}
+
+					if(__dom){
+						for (var property in __dom) {
+							if(__dom.hasOwnProperty(property)){
+								if(property.indexOf("on") == 0){
+									var type = __dom[property].events.type;
+									var handle = __dom[property].events.handle;
+
+									__dom[property].events.element.removeEventListener(type, handle);
+								}
+							}
+						}
+					}
+
+					option.events[_value](event);
+
+					if(_dom){
+						for (var property in _dom) {
+							if(_dom.hasOwnProperty(property)){
+								if(property.indexOf("on") == 0){
+									var type = _dom[property].events.type;
+									var handle = _dom[property].events.handle;
+
+									_dom[property].events.element.addEventListener(type, handle);
+								}
+							}
+						}
+					}
 				}
-				Await.tasks = [];
-				option.events[_value](event);
 			};
 		}
 
@@ -499,7 +532,7 @@
 			attr = attr.toLowerCase();
 			if(_dom){
 				if(_dom[attr]){
-					Repaint(_dom[attr], value);   
+					Repaint(_dom[attr], value);
 				}
 			}
 		}
@@ -521,6 +554,7 @@
 			var id = key[0];
 			var idx = key[1];
 			var option = new Object(options[id]);
+			var _dom = dom[id][idx];
 
 			if(typeof idx != "undefined"){
 				var state = newValue ? newValue.$tate : "";
@@ -540,27 +574,26 @@
 					option.data = [newValue];
 					delete newValue.$tate;
 					Diff(newValue, oldValue, option);
+					
 				}else if(!newValue){
 					option.type = "remove";
 					var _idx = index[id].indexOf(idx*1);
 					option.data = [newValue];
 
-					for (var property in dom[id][idx]) {
-						if(dom[id][idx].hasOwnProperty(property)){
-							if(property != "property"){
+					if(_dom){
+						for (var property in _dom) {
+							if(_dom.hasOwnProperty(property)){
 								if(property.indexOf("on") == 0){
-									for(var e in dom[id][idx][property].events){
-										var type = dom[id][idx][property].events.type;
-										var handle = dom[id][idx][property].events.handle;
-										dom[id][idx][property].events.element.removeEventListener(type, handle);
-									}
+									var type = _dom[property].events.type;
+									var handle = _dom[property].events.handle;
+									_dom[property].events.element.removeEventListener(type, handle);
 								}
 							}
 						}
 					}
 
-					dom[id][idx].node.parentNode.removeChild(dom[id][idx].node);
-					delete dom[id][idx];
+					_dom.node.parentNode.removeChild(_dom.node);
+					delete _dom;
 
 					index[id].splice(_idx, 1);
 
@@ -571,9 +604,6 @@
 					option.sync ? SetCookie(id, index[id]) : "";
 				}
 				ChangedItem(option);
-			}
-			if(promise.task){
-				Await();
 			}
 		}
 	}
@@ -591,7 +621,7 @@
 
 		var sync = options[id].sync;
 		var key = getIdx(option, option.idx);
-		var data = option.data[($for[id].type ? 0 : idx)];
+		var data = option.data[idx];
 
 		if(data){
 			!sync ? data.$ync = Math.random().toString(36).substring(7) : "";
@@ -646,12 +676,12 @@
 			var typeof_array = typeof option.data == "undefined";
 
 			$for[option.id] = {
-				idx : (for_type ? 0 : $for[option.id].idx + 1),
-				len : (for_type ? len : $for[option.id].len + 1),
+				idx : 0,
+				len : len,
 				option : option,
 				type : typeof_array
 			};
-		}		
+		}
 	}
 
 	function getIdx(option, idx){
@@ -708,12 +738,12 @@
 					option.template = options[id].template;
 					option.target = options[id].target;
 				}else{
-					option.cache = option.sync ? true : false;	
+					option.cache = option.sync ? true : false;
 				}
 
 				$for[option.id] = {
-					idx : (for_type ? 0 : $for[id].idx + 1),
-					len : (for_type ? len : $for[id].len + 1),
+					idx : 0,
+					len : len,
 					option : option,
 					type : typeof_array
 				};
@@ -737,7 +767,7 @@
 			oldValue != null ? delete oldValue.$tate : "";
 			oldValue = JSON.stringify(oldValue);
 		}
-			
+
 		var _newValue = JSON.stringify(newValue);
 
 		if(oldValue != _newValue){
