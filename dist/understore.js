@@ -264,8 +264,6 @@
 		}else{
 			Await();
 		}
-
-		promise.tasks == Await.tasks.length;
 	}
 
 	function Await(o){
@@ -274,9 +272,11 @@
 				o.option.promise = true;
 				if(typeof promise.task != "undefined"){
 					Await.tasks.push(o);
-					return false;
+					clearInterval(promise.task);
+					promise.task = setInterval(promise, Idle.duration);
+					return;
 				}else if(typeof promise.task == "undefined"){
-					promise.task = setInterval(promise);
+					promise.task = true;
 				}
 			}
 		}else{
