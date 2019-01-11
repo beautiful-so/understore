@@ -52,7 +52,6 @@
 			}
 		};
 
-		promise.tasks = 0;
 		Idle.milliseconds = 0;
 		Idle.duration = 10;
 		Idle.tasks = [];
@@ -193,9 +192,6 @@
 						setTimeout(Chain, Idle.duration);
 					}
 				}else{
-					clearInterval(promise.task);
-					promise.tasks = 0;
-					delete promise.task;
 					Catch.error.splice(0, Catch.error.length);
 				}
 			}else{
@@ -256,27 +252,17 @@
 		}
 	}
 
-	function promise(){
-		if(Await.tasks.length == promise.tasks){
-			clearInterval(promise.task);
-			promise.tasks = 0;
-			delete promise.task;
-		}else{
-			Await();
-		}
-	}
-
 	function Await(o){
 		if(o){
 			if(!o.option.promise){
 				o.option.promise = true;
-				if(typeof promise.task != "undefined"){
+				if(typeof Await.task != "undefined"){
 					Await.tasks.push(o);
-					clearInterval(promise.task);
-					promise.task = setInterval(promise, Idle.duration);
+					clearInterval(Await.task);
+					Await.task = setInterval(Await, 9);
 					return;
-				}else if(typeof promise.task == "undefined"){
-					promise.task = true;
+				}else if(typeof Await.task == "undefined"){
+					Await.task = true;
 				}
 			}
 		}else{
