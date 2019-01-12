@@ -273,6 +273,7 @@
 				understore[task.action](option);
 			}else{
 				Await.tasks.length = 0;
+				clearInterval(Await.task);
 			}
 		}
 
