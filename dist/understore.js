@@ -41,20 +41,22 @@
 			setItem : function(option){
 				option = Async(option, "setItem");
 				option ? SetItem(option) : undefined;
+				return;
 			},
 			removeItem : function(option){
 				option = Async(option, "removeItem");
 				option ? RemoveItem(option) : undefined;
+				return;
 			},
 			clear : function(option){
 				option = Async(option, "clear");
 				option ? Clear(option) : undefined;
+				return;
 			}
 		};
 
-		Idle.milliseconds = 0;
-		Idle.duration = 10;
-		Idle.tasks = [];
+		Chain.duration = 10;
+		Chain.tasks = [];
 		Await.tasks = [];
 		Catch.error = [];
 
@@ -71,8 +73,6 @@
 	}
 	
 	function Request(url, obj){
-		clearInterval(Idle.task);
-		Idle.milliseconds = 0;
 		Fetch.request = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
 		Request.timeout = obj.timeout ? setTimeout(Abort, obj.timeout) : false;
 		if(obj.cache){
@@ -98,13 +98,10 @@
 					}
 
 					delete Fetch.request;
-					Idle.milliseconds = 1;
 					Chain(res);
 				}
 			}catch(err){
-				clearInterval(Idle.task);
 				delete Fetch.request;
-				Chain(res);
 				console.log(err);
 			}
 		};
@@ -123,12 +120,12 @@
 		if(typeof Fetch.request == "object"){
 			Fetch.request.abort();
 			delete Fetch.request;
-			Idle.milliseconds = 0;
-			Idle.tasks.splice(0,Idle.tasks.length);
+			Chain.tasks.splice(0,Chain.tasks.length);
 		}
 	}
 
 	function Fetch(url, obj){
+		clearInterval(Chain.task);
 		try{
 			if(typeof url == "string"){
 				if(typeof obj == "undefined"){
@@ -141,39 +138,26 @@
 				var _task = [url, obj];
 				_task.key = "fetch";
 
-				Idle.tasks.push(_task);
-
-				if (Idle.tasks.length)
-					Idle.task = !Idle.task ? setInterval(Idle, Idle.duration) : undefined;
+				Chain.tasks.push(_task);
+				Chain.task = setInterval(Chain, Chain.duration);
 
 				return {
 					then : Then,
 					fetch : Fetch,
 					catch : Catch
 				};
-			}else{
-				clearInterval(Idle.task);
 			}
 		}catch(err){
 			console.log(err);
-			clearInterval(Idle.task);
 		}
 	}
 
-	function Idle(){
-		Idle.milliseconds += 0.1;
-		if(Idle.milliseconds > 1){
-			Chain();
-			clearInterval(Idle.task);
-		}
-	}
-	
 	function Chain(res){
+		clearInterval(Chain.task);
 		try{
-			if(Idle.tasks.length > 0){
-				var task = Idle.tasks.shift();
+			if(Chain.tasks.length > 0){
+				var task = Chain.tasks.shift();
 				var key = task.key;
-				Idle.milliseconds = 0;
 
 				if(key == "fetch"){
 					Request(task[0], task[1]);
@@ -182,73 +166,55 @@
 						task(Catch.error);
 						Catch.error.splice(0, Catch.error.length);
 					}
-					if(Idle.tasks.length > 0){
-						setTimeout(Chain, Idle.duration);
-					}
 				}else if(key == "then"){
 					typeof res != "undefined" ? task(res) : task();
-
-					if(Idle.tasks.length > 0){
-						setTimeout(Chain, Idle.duration);
-					}
+					Chain();
 				}else{
 					Catch.error.splice(0, Catch.error.length);
 				}
-			}else{
-				clearInterval(Idle.task);
 			}
 		}catch(err){
 			Catch.error.push(err);
-			if(Idle.tasks.length > 0){
-				setTimeout(Chain, Idle.duration);
-			}else{
-				clearInterval(Idle.task);
-			}
+			console.log(err);
+			clearInterval(Chain.task);
 		}
 	}
 	
 	function Catch(task){
-		Idle.milliseconds = 0;
+		clearInterval(Chain.task);
 		try{
 			if(typeof task == "function"){
 				task.key = "catch";
-				Idle.tasks.push(task);
-				if (Idle.tasks.length == 1)
-					Idle.task = !Idle.task ? setInterval(Idle, Idle.duration) : undefined;
+				Chain.tasks.push(task);
+				if (Chain.tasks.length == 1)
+					Chain.task = !Chain.task ? setInterval(Chain, Chain.duration) : undefined;
 				return {
 					then : Then,
 					fetch : Fetch,
 					catch : Catch 
 				};
-			}else{
-				clearInterval(Idle.task);
 			}
 		}catch(err){
 			console.log(err);
-			clearInterval(Idle.task);
 		}
 	}
 
 	function Then(task){
-		Idle.milliseconds = 0;
+		clearInterval(Chain.task);
 		try{
 			if(typeof task == "function"){
 				task.key = "then";
-				Idle.tasks.push(task);
-				if (Idle.tasks.length == 1)
-					Idle.task = !Idle.task ? setInterval(Idle, Idle.duration) : undefined;
+				Chain.tasks.push(task);
+				Chain.task = setInterval(Chain, Chain.duration);
 
 				return {
 					then : Then,
 					fetch : Fetch,
 					catch : Catch 
 				};
-			}else{
-				clearInterval(Idle.task);
 			}
 		}catch(err){
 			console.log(err);
-			clearInterval(Idle.task);
 		}
 	}
 
@@ -259,7 +225,7 @@
 				if(typeof Await.task != "undefined"){
 					Await.tasks.push(o);
 					clearInterval(Await.task);
-					Await.task = setInterval(Await, 9);
+					Await.task = setInterval(Await);
 					return;
 				}else if(typeof Await.task == "undefined"){
 					Await.task = true;
@@ -274,6 +240,7 @@
 			}else{
 				Await.tasks.length = 0;
 				clearInterval(Await.task);
+				delete Await.task;
 			}
 		}
 
@@ -282,7 +249,7 @@
 
 	function Async(option, action){
 		var states = Await({option: option, action:action});
-
+		
 		if(typeof option.option != "undefined"){
 			var promise = option.option.promise;
 				option = option.option;
@@ -349,7 +316,7 @@
 
 		function eventBind(event, element, option, _option, _value){
 			return function(event){
-				if(Idle.tasks.length == 0){
+				if(Chain.tasks.length == 0){
 					var id = event.id  = _option.id;
 					var idx= event.idx = _option.idx;
 					var __dom = dom[id][idx];
@@ -535,7 +502,7 @@
 		if(e.oldValue != e.newValue){
 			var newValue = typeof e.newValue != "undefined" && e.newValue != "" ? JSON.parse(e.newValue) : "";
 			var oldValue = typeof e.oldValue != "undefined" && e.oldValue != "" ? JSON.parse(e.oldValue) : "";
-
+			clearInterval(Await.task);
 			var key = e.key;
 				key = key.split("-!#");
 			var id = key[0];
@@ -561,7 +528,7 @@
 					option.data = [newValue];
 					delete newValue.$tate;
 					Diff(newValue, oldValue, option);
-					
+					Await.task = setInterval(Await);
 				}else if(!newValue){
 					option.type = "remove";
 					var _idx = index[id].indexOf(idx*1);
@@ -589,6 +556,7 @@
 					}
 
 					option.sync ? SetCookie(id, index[id]) : "";
+					Await.task = setInterval(Await);
 				}
 				ChangedItem(option);
 			}
@@ -596,6 +564,7 @@
 	}
 
 	function While(id){
+		clearInterval(Await.task);
 		var len = $for[id].len;
 		var idx = $for[id].idx;
 		var option = $for[id].option;
@@ -654,6 +623,7 @@
 				$for[option.id].idx = $for[option.id].idx+1;
 				While(option.id);
 			}else{
+				Await.task = setInterval(Await);
 				delete option.cache;
 				typeof option.created != "undefined" ? option.created(option) : "";
 			}
