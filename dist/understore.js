@@ -494,7 +494,9 @@
 
 	function Diff(obj1, obj2, v) {
 		for (var prop in obj1) {
-			obj1.hasOwnProperty(prop) && prop != '__proto__' ? obj1[prop] != obj2[prop] ? DiffChanged(v, prop) : "" : "";
+			if(obj1.hasOwnProperty(prop) && prop != '__proto__'){
+				DiffChanged(v, prop);
+			}
 		}
 	}
 
@@ -623,9 +625,9 @@
 				$for[option.id].idx = $for[option.id].idx+1;
 				While(option.id);
 			}else{
-				Await.task = setInterval(Await);
 				delete option.cache;
 				typeof option.created != "undefined" ? option.created(option) : "";
+				Await.task = setInterval(Await);
 			}
 		}else if(option.sync){
 			var len = index[option.id].length;
