@@ -225,7 +225,7 @@
 				if(typeof Await.task != "undefined"){
 					Await.tasks.push(o);
 					clearInterval(Await.task);
-					Await.task = setInterval(Await);
+					Await.task = setInterval(Await, 9);
 					return;
 				}else if(typeof Await.task == "undefined"){
 					Await.task = true;
