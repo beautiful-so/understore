@@ -474,7 +474,9 @@
 			path.pop();
 			if(path.length){
 				for(var i = 0, len = path.length; i < len; i++){
-					value = value[path[i]];
+					if(typeof value[path[i]] != "undefined"){
+						value = value[path[i]];
+					}
 				}
 			}
 			k = prop+"-"+path.toString().replace(/,/g, "-");
@@ -626,7 +628,10 @@
 				While(option.id);
 			}else{
 				delete option.cache;
-				typeof option.created != "undefined" ? option.created(option) : "";
+				if(typeof option.created != "undefined"){
+					option.created(option);
+					delete option.created;
+				}
 				Await.task = setInterval(Await);
 			}
 		}else if(option.sync){
