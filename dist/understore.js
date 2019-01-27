@@ -224,8 +224,7 @@
 				o.option.promise = true;
 				if(typeof Await.task != "undefined"){
 					Await.tasks.push(o);
-					clearInterval(Await.task);
-					Await.task = setInterval(Await);
+					setTimeout(Await);
 					return;
 				}else if(typeof Await.task == "undefined"){
 					Await.task = true;
@@ -237,10 +236,9 @@
 			if(task){
 				var option = task.option;
 				understore[task.action](option);
+				setTimeout(Await);
 			}else{
 				Await.tasks.length = 0;
-				clearInterval(Await.task);
-				delete Await.task;
 			}
 		}
 
@@ -506,7 +504,6 @@
 		if(e.oldValue != e.newValue){
 			var newValue = typeof e.newValue != "undefined" && e.newValue != "" ? JSON.parse(e.newValue) : "";
 			var oldValue = typeof e.oldValue != "undefined" && e.oldValue != "" ? JSON.parse(e.oldValue) : "";
-			clearInterval(Await.task);
 			var key = e.key;
 				key = key.split("-!#");
 			var id = key[0];
@@ -568,7 +565,6 @@
 	}
 
 	function While(id){
-		clearInterval(Await.task);
 		delete Await.task;
 		var len = $for[id].len;
 		var idx = $for[id].idx;
