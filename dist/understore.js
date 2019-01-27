@@ -225,7 +225,7 @@
 				if(typeof Await.task != "undefined"){
 					Await.tasks.push(o);
 					clearInterval(Await.task);
-					Await.task = setInterval(Await, 9);
+					Await.task = setInterval(Await);
 					return;
 				}else if(typeof Await.task == "undefined"){
 					Await.task = true;
@@ -532,7 +532,7 @@
 					option.data = [newValue];
 					delete newValue.$tate;
 					Diff(newValue, oldValue, option);
-					Await.task = setInterval(Await);
+					setTimeout(Await);
 				}else if(!newValue){
 					option.type = "remove";
 					var _idx = index[id].indexOf(idx*1);
@@ -560,7 +560,7 @@
 					}
 
 					option.sync ? SetCookie(id, index[id]) : "";
-					Await.task = setInterval(Await);
+					setTimeout(Await);
 				}
 				ChangedItem(option);
 			}
@@ -569,6 +569,7 @@
 
 	function While(id){
 		clearInterval(Await.task);
+		delete Await.task;
 		var len = $for[id].len;
 		var idx = $for[id].idx;
 		var option = $for[id].option;
@@ -632,7 +633,7 @@
 					option.created(option);
 					delete option.created;
 				}
-				Await.task = setInterval(Await);
+				setTimeout(Await);
 			}
 		}else if(option.sync){
 			var len = index[option.id].length;
