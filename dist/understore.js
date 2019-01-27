@@ -224,7 +224,8 @@
 				o.option.promise = true;
 				if(typeof Await.task != "undefined"){
 					Await.tasks.push(o);
-					setTimeout(Await);
+					clearInterval(Await.task);
+					Await.task = setInterval(Await, 9);
 					return;
 				}else if(typeof Await.task == "undefined"){
 					Await.task = true;
@@ -236,9 +237,10 @@
 			if(task){
 				var option = task.option;
 				understore[task.action](option);
-				setTimeout(Await);
 			}else{
 				Await.tasks.length = 0;
+				clearInterval(Await.task);
+				delete Await.task;
 			}
 		}
 
@@ -436,7 +438,7 @@
 					} else {
 						_dom.node = element;
 						if(option.insert == "prepend"){
-							option.target.insertBefore(element, option.target.querySelector(element.tagName));
+							option.target.insertBefore(element);
 						}else{
 							option.target.appendChild(element);
 						}
@@ -504,6 +506,7 @@
 		if(e.oldValue != e.newValue){
 			var newValue = typeof e.newValue != "undefined" && e.newValue != "" ? JSON.parse(e.newValue) : "";
 			var oldValue = typeof e.oldValue != "undefined" && e.oldValue != "" ? JSON.parse(e.oldValue) : "";
+			clearInterval(Await.task);
 			var key = e.key;
 				key = key.split("-!#");
 			var id = key[0];
@@ -529,7 +532,7 @@
 					option.data = [newValue];
 					delete newValue.$tate;
 					Diff(newValue, oldValue, option);
-					setTimeout(Await);
+					Await.task = setInterval(Await);
 				}else if(!newValue){
 					option.type = "remove";
 					var _idx = index[id].indexOf(idx*1);
@@ -557,7 +560,7 @@
 					}
 
 					option.sync ? SetCookie(id, index[id]) : "";
-					setTimeout(Await);
+					Await.task = setInterval(Await);
 				}
 				ChangedItem(option);
 			}
@@ -565,7 +568,7 @@
 	}
 
 	function While(id){
-		delete Await.task;
+		clearInterval(Await.task);
 		var len = $for[id].len;
 		var idx = $for[id].idx;
 		var option = $for[id].option;
@@ -629,7 +632,7 @@
 					option.created(option);
 					delete option.created;
 				}
-				setTimeout(Await);
+				Await.task = setInterval(Await);
 			}
 		}else if(option.sync){
 			var len = index[option.id].length;
