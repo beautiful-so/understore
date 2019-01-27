@@ -438,7 +438,7 @@
 					} else {
 						_dom.node = element;
 						if(option.insert == "prepend"){
-							option.target.insertBefore(element);
+							option.target.insertBefore(element, option.target.querySelector(element.tagName));
 						}else{
 							option.target.appendChild(element);
 						}
