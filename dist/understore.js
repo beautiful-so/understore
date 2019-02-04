@@ -222,24 +222,25 @@
 		if(o){
 			if(!o.option.promise){
 				o.option.promise = true;
-				if(typeof Await.task != "undefined"){
+				if(Await.task == "Pending"){
+					Await.task = "Fullfilled";
 					Await.tasks.push(o);
-					clearInterval(Await.task);
-					Await.task = setInterval(Await, 9);
 					return;
 				}else if(typeof Await.task == "undefined"){
-					Await.task = true;
+					Await.task = "Pending";
+				}else if(Await.task == "Fullfilled"){
+					Await.tasks.push(o);
+					Await();
+					return;
 				}
 			}
 		}else{
 			var task = Await.tasks.shift();
-
 			if(task){
 				var option = task.option;
 				understore[task.action](option);
 			}else{
 				Await.tasks.length = 0;
-				clearInterval(Await.task);
 				delete Await.task;
 			}
 		}
@@ -249,7 +250,7 @@
 
 	function Async(option, action){
 		var states = Await({option: option, action:action});
-		
+
 		if(typeof option.option != "undefined"){
 			var promise = option.option.promise;
 				option = option.option;
@@ -320,8 +321,8 @@
 					var id = event.id  = _option.id;
 					var idx= event.idx = _option.idx;
 					var __dom = dom[id][idx];
-
 					var o = GetItem(_option);
+
 					event.element = element;
 					event.data = o.data;
 					if(_option.parent){
@@ -438,7 +439,7 @@
 					} else {
 						_dom.node = element;
 						if(option.insert == "prepend"){
-							option.target.insertBefore(element);
+							option.target.insertBefore(element, option.target.childNodes[0]);
 						}else{
 							option.target.appendChild(element);
 						}
@@ -506,7 +507,7 @@
 		if(e.oldValue != e.newValue){
 			var newValue = typeof e.newValue != "undefined" && e.newValue != "" ? JSON.parse(e.newValue) : "";
 			var oldValue = typeof e.oldValue != "undefined" && e.oldValue != "" ? JSON.parse(e.oldValue) : "";
-			clearInterval(Await.task);
+			Await.task = "Pending";
 			var key = e.key;
 				key = key.split("-!#");
 			var id = key[0];
@@ -532,7 +533,8 @@
 					option.data = [newValue];
 					delete newValue.$tate;
 					Diff(newValue, oldValue, option);
-					Await.task = setInterval(Await);
+					Await.task = "Fullfilled";
+					Await();
 				}else if(!newValue){
 					option.type = "remove";
 					var _idx = index[id].indexOf(idx*1);
@@ -555,12 +557,20 @@
 
 					index[id].splice(_idx, 1);
 
+					if(Clear.task){
+						if(index[id].length == 0){
+							Await.task = "Fullfilled";
+							setTimeout(Await);
+						}   
+					}else{
+						Await.task = "Fullfilled";
+						Await();
+					}
 					if(index[id].length == 0){
 						delete $for[id];
 					}
 
 					option.sync ? SetCookie(id, index[id]) : "";
-					Await.task = setInterval(Await);
 				}
 				ChangedItem(option);
 			}
@@ -568,7 +578,6 @@
 	}
 
 	function While(id){
-		clearInterval(Await.task);
 		var len = $for[id].len;
 		var idx = $for[id].idx;
 		var option = $for[id].option;
@@ -632,7 +641,8 @@
 					option.created(option);
 					delete option.created;
 				}else{
-					Await.task = setInterval(Await);	
+					Await.task = "Fullfilled";
+					Await();
 				}
 			}
 		}else if(option.sync){
@@ -792,7 +802,7 @@
 		var id = option.id;
 		var item = index[id];
 		var len = item ? item.length : false;
-
+		Clear.task = "pending";
 		if(len){
 			for(var i = 0; i < len; i++){
 				understore.removeItem({id : id, idx : item[i]}); 
