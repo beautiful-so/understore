@@ -219,7 +219,6 @@
 	}
 
 	function Await(o){
-		console.log(Await.tasks.length);
 		if(o){
 			if(!o.option.promise){
 				o.option.promise = true;
@@ -232,7 +231,7 @@
 					Await.task = "Pending";
 				}else if(Await.task == "Fullfilled"){
 					Await.tasks.push(o);
-					setTimeout(Await,1);
+					setTimeout(Await);
 					return;
 				}
 			}
@@ -536,7 +535,7 @@
 					delete newValue.$tate;
 					Diff(newValue, oldValue, option);
 					Await.task = "Fullfilled";
-					setTimeout(Await,1);
+					setTimeout(Await);
 				}else if(!newValue){
 					option.type = "remove";
 					var _idx = index[id].indexOf(idx*1);
@@ -565,11 +564,11 @@
 						if(Clear.task == "pending"){
 							delete Clear.task;
 							Await.task = "Fullfilled";
-							setTimeout(Await,1);
+							setTimeout(Await);
 						}
 					}else{
 						Await.task = "Fullfilled";
-						setTimeout(Await,1);
+						setTimeout(Await);
 					}
 
 					option.sync ? SetCookie(id, index[id]) : "";
@@ -644,7 +643,7 @@
 					delete option.created;
 				}else{
 					Await.task = "Fullfilled";
-					setTimeout(Await,1);
+					setTimeout(Await);
 				}
 			}
 		}else if(option.sync){
