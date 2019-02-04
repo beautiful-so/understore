@@ -222,6 +222,7 @@
 		if(o){
 			if(!o.option.promise){
 				o.option.promise = true;
+
 				if(Await.task == "Pending"){
 					Await.task = "Fullfilled";
 					Await.tasks.push(o);
@@ -241,7 +242,11 @@
 				understore[task.action](option);
 			}else{
 				Await.tasks.length = 0;
-				delete Await.task;
+				if(o == false){
+					delete Await.task;
+				}else{
+					Await(false);
+				}
 			}
 		}
 
@@ -557,17 +562,17 @@
 
 					index[id].splice(_idx, 1);
 
-					if(Clear.task){
-						if(index[id].length == 0){
+					if(index[id].length == 0){
+						delete $for[id];
+						
+						if(Clear.task == "pending"){
+							delete Clear.task;
 							Await.task = "Fullfilled";
-							setTimeout(Await);
-						}   
+							Await();
+						}
 					}else{
 						Await.task = "Fullfilled";
 						Await();
-					}
-					if(index[id].length == 0){
-						delete $for[id];
 					}
 
 					option.sync ? SetCookie(id, index[id]) : "";
