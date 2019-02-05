@@ -732,25 +732,26 @@
 
 	function SetItem(option){
 		var id = option.id;
-		typeof option.idx == "undefined" ? option.idx = 0 : "";
-		typeof option.template == "undefined" ? option.template = options[id].template : "";
-		var key = getIdx(option, option.idx);
-		var sync = options[id].sync;
-		var newValue = option.data;
-		var oldValue = sync ? $tore.localStorage.getItem(key) : $tore.sessionStorage.getItem(key);
-		
-		if(oldValue != "undefined"){
-			oldValue = JSON.parse(oldValue);
-			oldValue != null ? delete oldValue.$tate : "";
-			oldValue = JSON.stringify(oldValue);
-		}
+		if(id){
+			typeof option.idx == "undefined" ? option.idx = 0 : "";
+			var key = getIdx(option, option.idx);
+			var sync = options[id].sync;
+			var newValue = option.data;
+			var oldValue = sync ? $tore.localStorage.getItem(key) : $tore.sessionStorage.getItem(key);
 
-		var _newValue = JSON.stringify(newValue);
+			if(oldValue != "undefined"){
+				oldValue = JSON.parse(oldValue);
+				oldValue != null ? delete oldValue.$tate : "";
+				oldValue = JSON.stringify(oldValue);
+			}
 
-		if(oldValue != _newValue){
-			typeof newValue.$tate == "undefined" ? newValue.$tate = { type : "set" } : newValue.$tate.type = "set";
-			_newValue = JSON.stringify(newValue);
-			sync ? $tore.localStorage.setItem(key, _newValue) : $tore.sessionStorage.setItem(key, _newValue);
+			var _newValue = JSON.stringify(newValue);
+
+			if(oldValue != _newValue){
+				typeof newValue.$tate == "undefined" ? newValue.$tate = { type : "set" } : newValue.$tate.type = "set";
+				_newValue = JSON.stringify(newValue);
+				sync ? $tore.localStorage.setItem(key, _newValue) : $tore.sessionStorage.setItem(key, _newValue);
+			}
 		}
 	}
 
