@@ -237,6 +237,7 @@
 			}
 		}else{
 			var task = Await.tasks.shift();
+
 			if(task){
 				var option = task.option;
 				understore[task.action](option);
@@ -502,6 +503,8 @@
 				DiffChanged(v, prop);
 			}
 		}
+		Await.task = "Fullfilled";
+		setTimeout(Await);
 	}
 
 	function StorageChanged(e){
@@ -534,8 +537,6 @@
 					option.data = [newValue];
 					delete newValue.$tate;
 					Diff(newValue, oldValue, option);
-					Await.task = "Fullfilled";
-					setTimeout(Await);
 				}else if(!newValue){
 					option.type = "remove";
 					var _idx = index[id].indexOf(idx*1);
@@ -560,14 +561,15 @@
 
 					if(index[id].length == 0){
 						delete $for[id];
-						
+
 						if(Clear.task == "pending"){
 							delete Clear.task;
 							Await.task = "Fullfilled";
 							setTimeout(Await);
 						}
-					}else{
-						Await.task = "Fullfilled";
+					}
+					if(typeof Clear.task == "undefined"){
+					   Await.task = "Fullfilled";
 						setTimeout(Await);
 					}
 
@@ -808,6 +810,8 @@
 			for(var i = 0; i < len; i++){
 				understore.removeItem({id : id, idx : item[i]}); 
 			}
+		}else{
+			setTimeout(Await);
 		}
 
 		return;
