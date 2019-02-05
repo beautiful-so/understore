@@ -643,10 +643,9 @@
 				if(typeof option.created != "undefined"){
 					option.created(option);
 					delete option.created;
-				}else{
-					Await.task = "Fullfilled";
-					setTimeout(Await);
 				}
+				Await.task = "Fullfilled";
+				setTimeout(Await);
 			}
 		}else if(option.sync){
 			var len = index[option.id].length;
