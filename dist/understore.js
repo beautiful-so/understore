@@ -231,7 +231,7 @@
 					Await.task = "Pending";
 				}else if(Await.task == "Fullfilled"){
 					Await.tasks.push(o);
-					setTimeout(Await);
+					Await();
 					return;
 				}
 			}
@@ -239,11 +239,9 @@
 			var task = Await.tasks.shift();
 
 			if(task){
-				var option = task.option;
-				understore[task.action](option);
+				understore[task.action](task.option);
 			}else{
-				Await.tasks.length = 0;
-				delete Await.task;
+				delete Await.task;	
 			}
 		}
 
@@ -260,6 +258,7 @@
 		}else{
 			option = states ? option : states;
 		}
+
 		return option;
 	}
 
@@ -358,6 +357,8 @@
 							}
 						}
 					}
+					
+					Await();
 				}
 			};
 		}
@@ -504,13 +505,14 @@
 			}
 		}
 		Await.task = "Fullfilled";
-		setTimeout(Await);
+		Await();
 	}
 
 	function StorageChanged(e){
 		if(e.oldValue != e.newValue){
 			var newValue = typeof e.newValue != "undefined" && e.newValue != "" ? JSON.parse(e.newValue) : "";
 			var oldValue = typeof e.oldValue != "undefined" && e.oldValue != "" ? JSON.parse(e.oldValue) : "";
+
 			Await.task = "Pending";
 			var key = e.key;
 				key = key.split("-!#");
@@ -558,6 +560,11 @@
 					delete _dom;
 
 					index[id].splice(_idx, 1);
+					
+					if(typeof Clear.task == "undefined"){
+						Await.task = "Fullfilled";
+						Await();
+					}
 
 					if(index[id].length == 0){
 						delete $for[id];
@@ -565,12 +572,8 @@
 						if(Clear.task == "pending"){
 							delete Clear.task;
 							Await.task = "Fullfilled";
-							setTimeout(Await);
+							Await();
 						}
-					}
-					if(typeof Clear.task == "undefined"){
-					   Await.task = "Fullfilled";
-						setTimeout(Await);
 					}
 
 					option.sync ? SetCookie(id, index[id]) : "";
@@ -645,7 +648,7 @@
 					delete option.created;
 				}
 				Await.task = "Fullfilled";
-				setTimeout(Await);
+				Await();
 			}
 		}else if(option.sync){
 			var len = index[option.id].length;
@@ -809,7 +812,7 @@
 				understore.removeItem({id : id, idx : item[i]}); 
 			}
 		}else{
-			setTimeout(Await);
+			Await();
 		}
 
 		return;
