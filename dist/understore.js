@@ -512,7 +512,6 @@
 		if(e.oldValue != e.newValue){
 			var newValue = typeof e.newValue != "undefined" && e.newValue != "" ? JSON.parse(e.newValue) : "";
 			var oldValue = typeof e.oldValue != "undefined" && e.oldValue != "" ? JSON.parse(e.oldValue) : "";
-
 			Await.task = "Pending";
 			var key = e.key;
 				key = key.split("-!#");
@@ -561,18 +560,16 @@
 
 					index[id].splice(_idx, 1);
 					
-					if(typeof Clear.task == "undefined"){
-						Await.task = "Fullfilled";
-						Await();
-					}
-
+					Await.task = "Fullfilled";
 					if(index[id].length == 0){
 						delete $for[id];
-
-						if(Clear.task == "pending"){
-							delete Clear.task;
-							Await.task = "Fullfilled";
-							Await();
+						delete Clear.task;
+						Await();
+					}else{
+						if(typeof Clear.task == "undefined"){
+							if(Await.tasks.length){
+								Await();
+							}
 						}
 					}
 
@@ -595,10 +592,13 @@
 		}
 
 		if(Await.task){
-			if(option.idx == While.idx){
+			if(!While.idx){
+
+			}else if(option.idx == While.idx){
 				option.idx += 1;
 			}
 			if(Await.task == "Fullfilled"){
+				Await.task = "Pending";
 				While.idx = option.idx;
 			}
 		}
@@ -755,7 +755,7 @@
 			oldValue != null ? delete oldValue.$tate : "";
 			oldValue = JSON.stringify(oldValue);
 		}
-
+		newValue.$ync = Math.random().toString(36).substring(7);
 		var _newValue = JSON.stringify(newValue);
 
 		if(oldValue != _newValue){
