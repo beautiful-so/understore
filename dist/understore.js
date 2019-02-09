@@ -244,7 +244,6 @@
 				delete Await.task;	
 			}
 		}
-
 		return o;
 	}
 
@@ -357,7 +356,7 @@
 							}
 						}
 					}
-					
+					Await.task = "Fullfilled";
 					Await();
 				}
 			};
@@ -504,8 +503,6 @@
 				DiffChanged(v, prop);
 			}
 		}
-		Await.task = "Fullfilled";
-		Await();
 	}
 
 	function StorageChanged(e){
@@ -538,6 +535,7 @@
 					option.data = [newValue];
 					delete newValue.$tate;
 					Diff(newValue, oldValue, option);
+					Await();
 				}else if(!newValue){
 					option.type = "remove";
 					var _idx = index[id].indexOf(idx*1);
@@ -559,21 +557,15 @@
 					delete _dom;
 
 					index[id].splice(_idx, 1);
-					
-					Await.task = "Fullfilled";
+
+					option.sync ? SetCookie(id, index[id]) : "";
 					if(index[id].length == 0){
 						delete $for[id];
 						delete Clear.task;
 						Await();
-					}else{
-						if(typeof Clear.task == "undefined"){
-							if(Await.tasks.length){
-								Await();
-							}
-						}
+					}else if(!Clear.task){
+						Await();
 					}
-
-					option.sync ? SetCookie(id, index[id]) : "";
 				}
 				ChangedItem(option);
 			}
@@ -584,23 +576,17 @@
 		var len = $for[id].len;
 		var idx = $for[id].idx;
 		var option = $for[id].option;
-		
+
 		if(option.cache){
 			option.idx = index[id].length ? index[id][idx] : idx;
 		}else{
-			option.idx = index[id].length ? Math.max.apply(null, index[id])+1 : idx;
-		}
-
-		if(Await.task){
-			if(!While.idx){
-
-			}else if(option.idx == While.idx){
-				option.idx += 1;
+			option.idx = index[id].length ? Math.max.apply(null, index[id])+1 : idx+1;
+			if(While[id]){
+				if(While[id] == option.idx){
+					option.idx += 1;   
+				}
 			}
-			if(Await.task == "Fullfilled"){
-				Await.task = "Pending";
-				While.idx = option.idx;
-			}
+			While[id] = option.idx;
 		}
 
 		var sync = options[id].sync;
@@ -656,7 +642,6 @@
 					option.created(option);
 					delete option.created;
 				}
-				Await.task = "Fullfilled";
 				Await();
 			}
 		}else if(option.sync){
@@ -755,7 +740,8 @@
 			oldValue != null ? delete oldValue.$tate : "";
 			oldValue = JSON.stringify(oldValue);
 		}
-		newValue.$ync = Math.random().toString(36).substring(7);
+		
+		newValue.$ync = Math.random().toString(36).substring(7)
 		var _newValue = JSON.stringify(newValue);
 
 		if(oldValue != _newValue){
@@ -807,7 +793,7 @@
 		var idx = option.idx;
 		var key = id+"-!#"+idx;
 		var v, sync = options[id].sync;
-			v = sync ? $tore.localStorage.removeItem(key) : $tore.sessionStorage.removeItem(key);		
+			v = sync ? $tore.localStorage.removeItem(key) : $tore.sessionStorage.removeItem(key);
 		return;
 	}
 
@@ -815,13 +801,13 @@
 		var id = option.id;
 		var item = index[id];
 		var len = item ? item.length : false;
-		Clear.task = "pending";
+
 		if(len){
+			Clear.task = "Pending";
 			for(var i = 0; i < len; i++){
 				understore.removeItem({id : id, idx : item[i]});
 			}
 		}else{
-			Await.task = "Fullfilled";
 			Await();
 		}
 
