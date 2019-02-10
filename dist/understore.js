@@ -55,7 +55,8 @@
 			}
 		};
 
-		Chain.duration = 10;
+		Chain.duration = 9;
+		Await.wait = 9;
 		Chain.tasks = [];
 		Await.tasks = [];
 		Catch.error = [];
@@ -223,16 +224,13 @@
 			if(!o.option.promise){
 				o.option.promise = true;
 
-				if(Await.task == "Pending"){
-					Await.task = "Fullfilled";
+				if(Await.wait){
+					clearTimeout(Await.promise);
 					Await.tasks.push(o);
+					Await.promise = setTimeout(Await, Await.wait);
 					return;
-				}else if(typeof Await.task == "undefined"){
-					Await.task = "Pending";
-				}else if(Await.task == "Fullfilled"){
-					Await.tasks.push(o);
-					Await();
-					return;
+				}else if(typeof Await.wait == "undefined"){
+					Await.promise = setTimeout(Await, Await.wait);
 				}
 			}
 		}else{
@@ -241,7 +239,7 @@
 			if(task){
 				understore[task.action](task.option);
 			}else{
-				delete Await.task;	
+				delete Await.promise;
 			}
 		}
 		return o;
@@ -356,7 +354,6 @@
 							}
 						}
 					}
-					Await.task = "Fullfilled";
 					Await();
 				}
 			};
@@ -518,7 +515,6 @@
 			var _dom = dom[id][idx];
 
 			if(typeof idx != "undefined"){
-				Await.task = "Pending";
 				var state = newValue ? newValue.$tate : "";
 				option.idx = idx*1;
 				option.type = state.type;
@@ -563,14 +559,9 @@
 					if(index[id].length == 0){
 						delete $for[id];
 						delete Clear.task;
-						delete While[id];
 						Await();
 					}else if(!Clear.task){
-						if(Await.tasks.length == 0){
-							delete While[id];
-						}else{
-							Await();
-						}
+						Await();
 					}
 				}
 				ChangedItem(option);
@@ -587,12 +578,6 @@
 			option.idx = index[id].length ? index[id][idx] : idx;
 		}else{
 			option.idx = index[id].length ? Math.max.apply(null, index[id])+1 : idx;
-			if(While[id]){
-				if(While[id] == option.idx){
-					option.idx += 1;   
-				}
-			}
-			While[id] = option.idx;
 		}
 
 		var sync = options[id].sync;
@@ -633,15 +618,17 @@
 	}
 
 	function Continue(option, data){
+		var id = option.id;
+		var idx = option.idx;
 		Render(option, data);
 
-		!option.cache ? option.insert == "prepend" ? index[option.id].unshift(option.idx) : index[option.id].push(option.idx) : "";
-		!option.cache && option.sync ? SetCookie(option.id, index[option.id]) : "";
+		!option.cache ? option.insert == "prepend" ? index[id].unshift(option.idx) : index[id].push(idx) : "";
+		!option.cache && option.sync ? SetCookie(id, index[id]) : "";
 
-		if(typeof $for[option.id] != "undefined"){
-			if($for[option.id].idx < $for[option.id].len){
-				$for[option.id].idx = $for[option.id].idx+1;
-				While(option.id);
+		if(typeof $for[id] != "undefined"){
+			if($for[id].idx < $for[id].len){
+				$for[id].idx = $for[id].idx+1;
+				While(id);
 			}else{
 				delete option.cache;
 				if(typeof option.created != "undefined"){
@@ -651,11 +638,11 @@
 				Await();
 			}
 		}else if(option.sync){
-			var len = index[option.id].length;
-			var for_type = typeof $for[option.id] == "undefined";
+			var len = index[id].length;
+			var for_type = typeof $for[id] == "undefined";
 			var typeof_array = typeof option.data == "undefined";
 
-			$for[option.id] = {
+			$for[id] = {
 				idx : 0,
 				len : len,
 				option : option,
@@ -811,7 +798,7 @@
 		if(len){
 			Clear.task = "Pending";
 			for(var i = 0; i < len; i++){
-				understore.removeItem({id : id, idx : item[i]});
+				RemoveItem({id : id, idx : item[i]});
 			}
 		}else{
 			Await();
