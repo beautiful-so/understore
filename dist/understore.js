@@ -741,7 +741,7 @@
 			oldValue = JSON.stringify(oldValue);
 		}
 		
-		newValue.$ync = Math.random().toString(36).substring(7)
+		newValue.$ync = Math.random().toString(36).substring(7);
 		var _newValue = JSON.stringify(newValue);
 
 		if(oldValue != _newValue){
