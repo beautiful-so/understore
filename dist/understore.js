@@ -509,7 +509,7 @@
 		if(e.oldValue != e.newValue){
 			var newValue = typeof e.newValue != "undefined" && e.newValue != "" ? JSON.parse(e.newValue) : "";
 			var oldValue = typeof e.oldValue != "undefined" && e.oldValue != "" ? JSON.parse(e.oldValue) : "";
-			Await.task = "Pending";
+
 			var key = e.key;
 				key = key.split("-!#");
 			var id = key[0];
@@ -518,6 +518,7 @@
 			var _dom = dom[id][idx];
 
 			if(typeof idx != "undefined"){
+				Await.task = "Pending";
 				var state = newValue ? newValue.$tate : "";
 				option.idx = idx*1;
 				option.type = state.type;
@@ -562,9 +563,14 @@
 					if(index[id].length == 0){
 						delete $for[id];
 						delete Clear.task;
+						delete While[id];
 						Await();
 					}else if(!Clear.task){
-						Await();
+						if(Await.tasks.length == 0){
+							delete While[id];
+						}else{
+							Await();
+						}
 					}
 				}
 				ChangedItem(option);
@@ -580,7 +586,7 @@
 		if(option.cache){
 			option.idx = index[id].length ? index[id][idx] : idx;
 		}else{
-			option.idx = index[id].length ? Math.max.apply(null, index[id])+1 : idx+1;
+			option.idx = index[id].length ? Math.max.apply(null, index[id])+1 : idx;
 			if(While[id]){
 				if(While[id] == option.idx){
 					option.idx += 1;   
@@ -810,7 +816,6 @@
 		}else{
 			Await();
 		}
-
 		return;
 	}
 
