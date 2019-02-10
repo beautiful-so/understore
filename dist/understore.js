@@ -551,6 +551,7 @@
 
 					_dom.node.parentNode.removeChild(_dom.node);
 					delete _dom;
+					delete While[id];
 
 					index[id].splice(_idx, 1);
 
@@ -577,6 +578,12 @@
 			option.idx = index[id].length ? index[id][idx] : idx;
 		}else{
 			option.idx = index[id].length ? Math.max.apply(null, index[id])+1 : idx;
+			if(While[id]){
+				if(While[id] == option.idx){
+					option.idx += 1;   
+				}
+			}
+			While[id] = option.idx;
 		}
 
 		var sync = options[id].sync;
