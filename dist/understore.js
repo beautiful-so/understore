@@ -55,7 +55,6 @@
 			}
 		};
 
-		Chain.duration = 9;
 		Await.wait = 9;
 		Chain.tasks = [];
 		Await.tasks = [];
@@ -126,7 +125,7 @@
 	}
 
 	function Fetch(url, obj){
-		clearInterval(Chain.task);
+		clearTimeout(Chain.promise);
 		try{
 			if(typeof url == "string"){
 				if(typeof obj == "undefined"){
@@ -140,7 +139,7 @@
 				_task.key = "fetch";
 
 				Chain.tasks.push(_task);
-				Chain.task = setInterval(Chain, Chain.duration);
+				Chain.promise = setTimeout(Chain, Await.wait);
 
 				return {
 					then : Then,
@@ -154,7 +153,7 @@
 	}
 
 	function Chain(res){
-		clearInterval(Chain.task);
+		clearTimeout(Chain.promise);
 		try{
 			if(Chain.tasks.length > 0){
 				var task = Chain.tasks.shift();
@@ -177,18 +176,18 @@
 		}catch(err){
 			Catch.error.push(err);
 			console.log(err);
-			clearInterval(Chain.task);
+			clearTimeout(Chain.promise);
 		}
 	}
 	
 	function Catch(task){
-		clearInterval(Chain.task);
+		clearTimeout(Chain.promise);
 		try{
 			if(typeof task == "function"){
 				task.key = "catch";
 				Chain.tasks.push(task);
 				if (Chain.tasks.length == 1)
-					Chain.task = !Chain.task ? setInterval(Chain, Chain.duration) : undefined;
+					Chain.promise = !Chain.promise ? setTimeout(Chain, Await.wait) : undefined;
 				return {
 					then : Then,
 					fetch : Fetch,
@@ -201,12 +200,12 @@
 	}
 
 	function Then(task){
-		clearInterval(Chain.task);
+		clearTimeout(Chain.promise);
 		try{
 			if(typeof task == "function"){
 				task.key = "then";
 				Chain.tasks.push(task);
-				Chain.task = setInterval(Chain, Chain.duration);
+				Chain.promise = setTimeout(Chain, Await.wait);
 
 				return {
 					then : Then,
