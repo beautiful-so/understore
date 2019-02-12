@@ -222,22 +222,25 @@
 		if(o){
 			if(!o.option.promise){
 				o.option.promise = true;
-
-				if(Await.wait){
+				
+				if(Await.promise){
 					clearTimeout(Await.promise);
 					Await.tasks.push(o);
-					Await.promise = setTimeout(Await, Await.wait);
+					if(!Await.task){
+						Await.promise = setTimeout(Await, Await.wait);
+					}
 					return;
-				}else if(typeof Await.wait == "undefined"){
+				}else{
 					Await.promise = setTimeout(Await, Await.wait);
 				}
 			}
 		}else{
-			var task = Await.tasks.shift();
+			Await.task = Await.tasks.shift();
 
-			if(task){
-				understore[task.action](task.option);
+			if(Await.task){
+				understore[Await.task.action](Await.task.option);
 			}else{
+				delete Await.task;
 				delete Await.promise;
 			}
 		}
