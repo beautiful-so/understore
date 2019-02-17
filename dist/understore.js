@@ -608,7 +608,7 @@
 				_data = JSON.stringify(data);
 				sync ? $tore.localStorage.setItem(key, _data) : $tore.sessionStorage.setItem(key, _data);
 
-				return {id : id , idx : idx};
+				return {id : id , idx : option.idx};
 			}else{
 				var parent;
 				if(typeof data.$tate != "undefined"){
