@@ -622,6 +622,7 @@
 				data.idx = option.idx;
 				option.parent = parent;
 				Continue(option, data);
+				return {id : id , idx : option.idx};
 			}
 		}
 	}
@@ -642,7 +643,6 @@
 				delete option.cache;
 				if(typeof option.created != "undefined"){
 					option.created(option);
-					delete option.created;
 				}
 				Await();
 			}
