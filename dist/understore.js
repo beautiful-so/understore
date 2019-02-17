@@ -608,7 +608,7 @@
 				_data = JSON.stringify(data);
 				sync ? $tore.localStorage.setItem(key, _data) : $tore.sessionStorage.setItem(key, _data);
 
-				return {id : id , idx : option.idx};
+				return {id : id , idx : idx};
 			}else{
 				var parent;
 				if(typeof data.$tate != "undefined"){
@@ -622,7 +622,6 @@
 				data.idx = option.idx;
 				option.parent = parent;
 				Continue(option, data);
-				return {id : id , idx : option.idx};
 			}
 		}
 	}
@@ -684,6 +683,7 @@
 		var len = index[id].length;
 
 		if(len > 0 && option.sync){
+			option.cache = true;
 			option.data = [];
 			for(var i = 0; i < len; i++){
 				var idx = index[id][i];
@@ -696,6 +696,8 @@
 					option.data.push(obj);
 				}
 			}
+		}else{
+			option.cache = false;
 		}
 		return AddItem(option);
 	}
@@ -713,8 +715,6 @@
 				if(typeof option.template == "undefined"){
 					option.template = options[id].template;
 					option.target = options[id].target;
-				}else{
-					option.cache = option.sync ? true : false;
 				}
 
 				$for[option.id] = {
