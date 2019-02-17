@@ -598,6 +598,7 @@
 			var _data = JSON.stringify(data);
 
 			if(!option.cache){
+				idx = option.idx;
 				data.$tate = {
 					type : "add",
 					parent : option.parent,
