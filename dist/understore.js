@@ -782,8 +782,8 @@
 			var sync = options[id].sync;
 			var d = sync ? localStorage.getItem(key) : sessionStorage.getItem(key);
 				d = d ? JSON.parse(d) : null;
-
-			data = {data : d, element : _dom[idx].node, id : id, idx : idx};
+			
+			data = {data : d, element : _dom[idx].node, id : id, idx : idx, parent : options[id].parent};
 		}else{
 			data = null;
 		}
