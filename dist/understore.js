@@ -604,7 +604,6 @@
 					parent : option.parent,
 					insert : option.insert
 				};
-				data.parent = option.parent;
 
 				_data = JSON.stringify(data);
 				sync ? $tore.localStorage.setItem(key, _data) : $tore.sessionStorage.setItem(key, _data);
