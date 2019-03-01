@@ -525,7 +525,7 @@
 					option.insert = state.insert;
 					option.cache = false;
 					option.body = Template(option.template, newValue, id, idx, state.parent);
-					state.parent ? newValue.parent = state.parent : "";
+					option.parent = state.parent;
 
 					Continue(option, newValue);
 				}else if(state.type === "set"){
