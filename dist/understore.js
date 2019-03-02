@@ -55,7 +55,7 @@
 			}
 		};
 
-		Await.wait = 50;
+		Await.wait = 100;
 		Chain.tasks = [];
 		Await.tasks = [];
 		Catch.error = [];
