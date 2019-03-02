@@ -55,7 +55,7 @@
 			}
 		};
 
-		Await.wait = 100;
+		Await.wait = 50;
 		Chain.tasks = [];
 		Await.tasks = [];
 		Catch.error = [];
@@ -341,22 +341,24 @@
 							}
 						}
 					}
+					
+					setTimeout(function(){
+						option.events[_value](event);
+						if(_dom){
+							for (var property in _dom) {
+								if(_dom.hasOwnProperty(property)){
+									if(property.indexOf("on") == 0){
+										var type = _dom[property].events.type;
+										var handle = _dom[property].events.handle;
 
-					option.events[_value](event);
-
-					if(_dom){
-						for (var property in _dom) {
-							if(_dom.hasOwnProperty(property)){
-								if(property.indexOf("on") == 0){
-									var type = _dom[property].events.type;
-									var handle = _dom[property].events.handle;
-
-									_dom[property].events.element.addEventListener(type, handle);
+										_dom[property].events.element.addEventListener(type, handle);
+									}
 								}
 							}
 						}
-					}
-					Await();
+						Await();
+					}, Await.wait);
+					
 				}
 			};
 		}
