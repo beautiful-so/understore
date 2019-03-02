@@ -356,9 +356,8 @@
 								}
 							}
 						}
-						Await();
 					}, Await.wait);
-					
+					Await();
 				}
 			};
 		}
