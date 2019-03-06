@@ -535,6 +535,7 @@
 					option.data = [newValue];
 					delete newValue.$tate;
 					Diff(newValue, oldValue, option);
+					ChangedItem(option);
 					Await();
 				}else if(!newValue){
 					option.type = "remove";
@@ -568,7 +569,6 @@
 						Await();
 					}
 				}
-				ChangedItem(option);
 			}
 		}
 	}
@@ -642,6 +642,7 @@
 			}else{
 				delete option.cache;
 				if(typeof option.created != "undefined"){
+					option.data = [data];
 					option.created(option);
 				}
 				Await();
@@ -774,17 +775,21 @@
 		var data = {};
 		var id = option.id;
 		var _dom = dom[id];
+		
+		try{
+			if(typeof _dom != "undefined"){
+				var idx = option.idx;
+				var key =id+"-!#"+idx;
+				var len = Object.keys(_dom).length-1;
+				var sync = options[id].sync;
+				var d = sync ? localStorage.getItem(key) : sessionStorage.getItem(key);
+					d = d ? JSON.parse(d) : null;
 
-		if(typeof _dom != "undefined"){
-			var idx = option.idx;
-			var key =id+"-!#"+idx;
-			var len = Object.keys(_dom).length-1;
-			var sync = options[id].sync;
-			var d = sync ? localStorage.getItem(key) : sessionStorage.getItem(key);
-				d = d ? JSON.parse(d) : null;
-			
-			data = {data : d, element : _dom[idx].node, id : id, idx : idx, parent : options[id].parent};
-		}else{
+				data = {data : d, element : _dom[idx].node, id : id, idx : idx, parent : options[id].parent};
+			}else{
+				data = null;
+			}
+		}catch(err){
 			data = null;
 		}
 
