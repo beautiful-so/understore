@@ -361,95 +361,97 @@
 				}
 			};
 		}
+		try{
+			function parse(target, node, data){
+				for (var i = 0, len1 = node.childNodes.length; i < len1; i++) {
+					var childNode = node.childNodes[i];
+					var nodeType = childNode.nodeType;
+					var nodeName = childNode.nodeName.toLowerCase();
+					var _nodeName = nodeName.replace("#", "");
+					var nodeValue = childNode.nodeValue;
+					var attributes = childNode.attributes;
 
-		function parse(target, node, data){
-			for (var i = 0, len1 = node.childNodes.length; i < len1; i++) {
-				var childNode = node.childNodes[i];
-				var nodeType = childNode.nodeType;
-				var nodeName = childNode.nodeName.toLowerCase();
-				var _nodeName = nodeName.replace("#", "");
-				var nodeValue = childNode.nodeValue;
-				var attributes = childNode.attributes;
+					if (attributes){
+						for (var c = 0, len2 = attributes.length; c < len2; c++) {
+							var attribute = attributes[c];
 
-				if (attributes){
-					for (var c = 0, len2 = attributes.length; c < len2; c++) {
-						var attribute = attributes[c];
+							var name  = attribute.nodeName;
+							var value = attribute.nodeValue;
 
-						var name  = attribute.nodeName;
-						var value = attribute.nodeValue;
-
-						if (name.indexOf("_") == 0){
-							var _name = name.replace("_", "");
-							var _value = attribute.nodeValue;
-							_dom[_name] = {
-								element : childNode,
-								attr : _value,
-								event : {}
-							};
-							setTimeout(function(childNode, name){
-								childNode.removeAttribute(name);
-							}, 0, childNode, name);
-						}
-
-						if(name.indexOf("-") == 0){
-							var _name = name.replace("-", "");
-							var _value = attribute.nodeValue;
-							_dom[_name] = {
-								element : childNode,
-								attr : _value,
-								event : {}
-							};
-							setTimeout(function(childNode, name){
-								childNode.removeAttribute(name);
-							}, 0, childNode, name);
-						}
-
-						if(name.indexOf("on") == 0){
-							var _value = attribute.nodeValue;
-							var _option = JSON.stringify(option);
-								_option = JSON.parse(_option);
-							var handle = eventBind(window.event, element, option, _option, _value);
-
-							childNode.addEventListener(name.replace("on", ""), handle);
-							if(_dom[name]){
-								_dom[name].events = {
-									type : name.replace("on", ""),
+							if (name.indexOf("_") == 0){
+								var _name = name.replace("_", "");
+								var _value = attribute.nodeValue;
+								_dom[_name] = {
 									element : childNode,
-									handle : handle
+									attr : _value,
+									event : {}
 								};
-							}else{
-								_dom[name] = {
-									events : {
+								setTimeout(function(childNode, name){
+									childNode.removeAttribute(name);
+								}, 0, childNode, name);
+							}
+
+							if(name.indexOf("-") == 0){
+								var _name = name.replace("-", "");
+								var _value = attribute.nodeValue;
+								_dom[_name] = {
+									element : childNode,
+									attr : _value,
+									event : {}
+								};
+								setTimeout(function(childNode, name){
+									childNode.removeAttribute(name);
+								}, 0, childNode, name);
+							}
+
+							if(name.indexOf("on") == 0){
+								var _value = attribute.nodeValue;
+								var _option = JSON.stringify(option);
+									_option = JSON.parse(_option);
+								var handle = eventBind(window.event, element, option, _option, _value);
+
+								childNode.addEventListener(name.replace("on", ""), handle);
+								if(_dom[name]){
+									_dom[name].events = {
 										type : name.replace("on", ""),
 										element : childNode,
 										handle : handle
-									}
-								};
+									};
+								}else{
+									_dom[name] = {
+										events : {
+											type : name.replace("on", ""),
+											element : childNode,
+											handle : handle
+										}
+									};
+								}
+
+								setTimeout(function(childNode, name){
+									childNode.removeAttribute(name);
+								}, 0, childNode, name);
 							}
-
-							setTimeout(function(childNode, name){
-								childNode.removeAttribute(name);
-							}, 0, childNode, name);
 						}
 					}
+
+					if (childNode.parentNode == node) {
+						if (childNode.childNodes.length) {
+							var _target = document.createElement(nodeName);
+							parse(_target, childNode, data);
+						} else {
+							_dom.node = element;
+							if(option.insert == "prepend"){
+								option.target.insertBefore(element, option.target.childNodes[0]);
+							}else{
+								option.target.appendChild(element);
+							}
+						}
+					} 
 				}
-
-				if (childNode.parentNode == node) {
-					if (childNode.childNodes.length) {
-						var _target = document.createElement(nodeName);
-						parse(_target, childNode, data);
-					} else {
-						_dom.node = element;
-						if(option.insert == "prepend"){
-							option.target.insertBefore(element, option.target.childNodes[0]);
-						}else{
-							option.target.appendChild(element);
-						}
-					}
-				} 
 			}
-		}
-		parse(option.target, element, data);
+			parse(option.target, element, data);
+		}catch(err){}
+
 	}
 
 	function Repaint(o, value){
