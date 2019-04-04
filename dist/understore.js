@@ -73,8 +73,9 @@
     }
 
     function clone(obj) {
-        if (obj === null || typeof(obj) !== 'object')
+        if (obj === null || typeof(obj) !== 'object'){
             return obj;
+		}
 
         var copy = obj.constructor();
 
@@ -201,8 +202,9 @@
             if(typeof task == "function"){
                 task.key = "catch";
                 Chain.tasks.push(task);
-                if (Chain.tasks.length == 1)
+                if (Chain.tasks.length == 1) {
                     Chain.promise = !Chain.promise ? setTimeout(Chain, Await.wait) : undefined;
+				}
                 return {
                     then : Then,
                     fetch : Fetch,
@@ -433,7 +435,6 @@
                                 childNode.addEventListener(name.replace("on", ""), handle);
 
                                 if(_dom[name]){
-                                    childNode
                                     _dom[name].events = {
                                         type : name.replace("on", ""),
                                         element : childNode,
