@@ -72,6 +72,21 @@
         return receiver;
     }
 
+    function clone(obj) {
+        if (obj === null || typeof(obj) !== 'object')
+            return obj;
+
+        var copy = obj.constructor();
+
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) {
+                copy[attr] = obj[attr];
+            }
+        }
+
+        return copy;
+    }
+
     function Request(url, obj){
         Fetch.request = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
         Request.timeout = obj.timeout ? setTimeout(Abort, obj.timeout) : false;
@@ -412,8 +427,7 @@
 
                             if(name.indexOf("on") == 0){
                                 var _value = attribute.nodeValue;
-                                var _option = JSON.stringify(option);
-                                    _option = JSON.parse(_option);
+                                var _option = clone(option);
                                 var handle = eventBind(window.event, element, option, _option, _value);
 
                                 childNode.addEventListener(name.replace("on", ""), handle);
