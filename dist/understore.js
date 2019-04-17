@@ -89,47 +89,62 @@
     }
 
     function Request(url, obj){
-        Fetch.request = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-        Request.timeout = obj.timeout ? setTimeout(Abort, obj.timeout) : false;
-        if(obj.cache){
-            var _url = url.indexOf("?") > -1 ? "&" : "?";
-            url += _url+Math.random().toString(36).substring(7);
-        }
-        Fetch.request.onreadystatechange = function (e) {
-            try{
-                if (e.target.readyState == 4) {
-                    clearTimeout(Request.timeout);
-                    delete Request.timeout;
+        if(obj.jsonp){
+			window._.$callback = function(body){
+				Chain({status : 200, body : body});
+			};
+			
+			var script = document.createElement("script");
+			url += (url.indexOf("?") > -1) ? "&callback=window.parent._.$callback" : "?callback=window.parent._.$callback";
 
-                    var res = {
-                        status : e.target.status,
-                        body : {}
-                    };
+			script.src = url;
+			script.onload = function() {
+				$dom.body.innerHTML = "";
+			};
+			$dom.body.appendChild(script);
+		}else{
+			Fetch.request = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+			Request.timeout = obj.timeout ? setTimeout(Abort, obj.timeout) : false;
+			if(obj.cache){
+				var _url = url.indexOf("?") > -1 ? "&" : "?";
+				url += _url+Math.random().toString(36).substring(7);
+			}
+			Fetch.request.onreadystatechange = function (e) {
+				try{
+					if (e.target.readyState == 4) {
+						clearTimeout(Request.timeout);
+						delete Request.timeout;
 
-                    try{
-                        res.body = JSON.parse(e.target.responseText);
-                    }catch(err){
-                        res.body = "";
-                        res.body = e.target.responseText;
-                    }
+						var res = {
+							status : e.target.status,
+							body : {}
+						};
 
-                    delete Fetch.request;
-                    Chain(res);
-                }
-            }catch(err){
-                delete Fetch.request;
-                console.log(err);
-            }
-        };
-        Fetch.request.open(obj.method, url, true);
-        if(obj.headers){
-            for (var header in obj.headers) {
-                if(obj.headers.hasOwnProperty(header)){
-                    Fetch.request.setRequestHeader(header, obj.headers[header]);
-                }
-            }
-        }
-        obj.body ? Fetch.request.send(obj.body) : Fetch.request.send();
+						try{
+							res.body = JSON.parse(e.target.responseText);
+						}catch(err){
+							res.body = "";
+							res.body = e.target.responseText;
+						}
+
+						delete Fetch.request;
+						Chain(res);
+					}
+				}catch(err){
+					delete Fetch.request;
+					console.log(err);
+				}
+			};
+			Fetch.request.open(obj.method, url, true);
+			if(obj.headers){
+				for (var header in obj.headers) {
+					if(obj.headers.hasOwnProperty(header)){
+						Fetch.request.setRequestHeader(header, obj.headers[header]);
+					}
+				}
+			}
+			obj.body ? Fetch.request.send(obj.body) : Fetch.request.send();
+		}
     }
 
     function Abort(){
